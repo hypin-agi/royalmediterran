@@ -1,0 +1,25 @@
+# ============================================================
+# AUDIENCE — célközönség szegmensek és personák
+# Ez táplálja: PPC targeting, ad angle-ök, social témák.
+# ============================================================
+
+segments:
+  - id: ""                      # rövid azonosító, pl. "parok"
+    name: ""                    # pl. "Párok / romantikus kiruccanás"
+    priority: 1                 # 1 = legfontosabb
+    description: ""
+    demographics:
+      age: ""
+      gender: ""
+      location: []              # földrajzi célzás
+      language: []
+    psychographics:
+      motivations: []           # miért vásárol, pl. ["élmény", "kikapcsolódás", "ajándékozás"]
+      pain_points: []           # mitől tart, mi tartja vissza
+      triggers: []              # mi indítja a vásárlást, pl. ["évforduló", "Valentin", "last minute"]
+    best_offers: []             # mely csomagok mennek nekik (offering.yaml id-k)
+    winning_angles: []          # bevált üzenet-szögek (performance-insights-ból)
+    channels: []                # hol érhető el, pl. ["Meta", "Instagram"]
+
+# Szezonális/alkalmi vásárlói momentumok (mikor keresnek aktívan)
+buying_moments: []              # pl. ["Valentin", "évforduló", "nyári szabadság", "karácsonyi ajándék"]

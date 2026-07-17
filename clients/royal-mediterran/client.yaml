@@ -1,0 +1,60 @@
+# ============================================================
+# ROYAL MEDITERRAN — master metaadat
+# Forrás: Asana projekt + Drive ügyfélmappa + hirdetési szövegek.xlsx
+# Utolsó frissítés: 2026-07-17
+# ============================================================
+
+client:
+  slug: "royal-mediterran"
+  name: "Royal Mediterran Aparthotel"
+  legal_name: ""                # TODO: cégnév a számlázáshoz
+  website: "https://royalmediterran.hu"
+  industry: "hotel / aparthotel / wellness — Balaton-parti szálláshely"
+  languages: ["hu", "de"]
+  markets: ["HU", "DE", "AT"]   # HU fő, DE/AT a német nyelvű hirdetések alapján
+  status: "active"
+  onboarded: "2023-03"          # Asana első projekt: 2023-03-28
+
+contacts:
+  agency:
+    account_manager: "Levente (Levi) Tanai"
+    graphics: "Dávid (statikus), Vivit, Bazsi (AI videók)"
+    ads: ""                     # TODO: Zoli? Gábor? — pontosítandó
+  client:
+    primary: "Petra"            # TODO: teljes név / szerep megerősítése
+    email: ""
+    phone: ""
+
+systems:
+  google_ads:
+    account_id: ""              # TODO
+    looker_studio: "https://lookerstudio.google.com/reporting/4e39ff08-9347-4af8-995b-9651222fa391/page/LmfuB"
+  meta_ads:
+    business_id: ""             # TODO
+    ad_account_id: ""           # TODO
+  analytics:
+    ga4_property: ""            # TODO
+  cms:
+    platform: "WordPress"
+    admin_url: ""               # TODO
+  email_marketing:
+    platform: "MailerLite"      # MailerLite x WordPress integráció (Gábor)
+  booking_pms:
+    platform: "SabeeApp"        # hotel foglalási/PMS riport a valós bevételhez
+  social:
+    instagram: ""               # TODO
+    facebook: ""                # TODO
+    tiktok: ""
+  project_mgmt:
+    asana_project: "https://app.asana.com/1/1203966796067054/project/1204459937939799"
+  drive:
+    client_folder: "https://drive.google.com/drive/folders/1xwMKSHkaO6oIUpJ3Y6S-klSVeShL4Al0"
+
+snapshot:
+  last_updated: "2026-07-17"
+  monthly_ad_budget_huf: null   # TODO — heti csekkből: ~napi 20e Ft cél költési limit karácsonykor
+  primary_kpi: "bevétel/nap + ROAS (foglalás-érték); heti Looker csekk"
+  notes: >
+    Kettős pozicionálás: NYÁRON családos aparthotel (közvetlen vízpart, saját strand,
+    apartmanok), EGÉSZ ÉVBEN párok/romantika (Penthouse, privát jakuzzi, félpanzió).
+    Erős szezonális kampányritmus + hajós élménycsomagok. HU + DE hirdetések.

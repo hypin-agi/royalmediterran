@@ -1,0 +1,91 @@
+# ============================================================
+# ROYAL MEDITERRAN — célközönség
+# Forrás: hirdetési szövegek.xlsx (HU/DE), Asana kampányok, csomag-kínálat.
+# ============================================================
+
+segments:
+  - id: "parok"
+    name: "Párok / romantikus kiruccanás"
+    priority: 1
+    description: >
+      A bevétel gerince egész évben. Rövid, élményközpontú páros feltöltődés a Balatonon,
+      privát wellnesszel. Ajándékozás (utalvány) és alkalmak köré épül.
+    demographics:
+      age: "25-55"
+      gender: "vegyes (a döntést gyakran a nő hozza, a férfi fizet/ajándékoz)"
+      location: ["Budapest", "nagyvárosok", "Dunántúl", "1.5-2 órás vonzáskörzet"]
+      language: ["hu"]
+    psychographics:
+      motivations: ["élmény", "kettesben töltött idő", "kikapcsolódás", "ajándékozás", "évforduló megünneplése"]
+      pain_points: ["megéri-e az ár", "elérhető-e a kívánt időpont", "elég romantikus-e"]
+      triggers: ["Valentin", "évforduló", "születésnap", "last minute vágy", "akció/kupon", "ajándékkeresés"]
+    best_offers: ["penthouse", "szerelmesek", "romantika-feltoltodes", "last-minute-teli", "lanykeres-hajos"]
+    winning_angles: ["privát jakuzzi/wellness", "élmény mint ajándék", "forintosított kedvezmény", "limitált/last minute sürgetés"]
+    channels: ["Meta (FB/IG)", "Google keresés", "hírlevél (MailerLite)"]
+
+  - id: "csaladok"
+    name: "Családok / nyári nyaralás"
+    priority: 2
+    description: >
+      Nyári főszezon fő szegmense. Közvetlen vízparti aparthotel, saját strand,
+      családbarát apartmanok. Gyerekbarát, biztonságos, kényelmes.
+    demographics:
+      age: "30-50 (szülők)"
+      gender: "vegyes"
+      location: ["Magyarország", "Budapest + vidék"]
+      language: ["hu"]
+    psychographics:
+      motivations: ["gyerekbarát nyaralás", "közvetlen strand", "kényelem", "biztonság", "családi emlékek"]
+      pain_points: ["gyerekekkel bonyolult a szervezés", "mennyire van közel a víz", "van-e elég tér"]
+      triggers: ["nyári szabadság tervezés (tavasz)", "iskolai szünet", "hőség"]
+    best_offers: ["penthouse-nyari-csalados", "piknik-balaton", "karacsony-csalados"]
+    winning_angles: ["a strand a lábad előtt van", "saját strand", "családbarát apartman", "vízparti panoráma"]
+    channels: ["Meta", "Google keresés"]
+
+  - id: "nemet-turistak"
+    name: "Német nyelvű turisták (DE/AT)"
+    priority: 3
+    description: >
+      A Balaton klasszikus német célpont. Külön német nyelvű hirdetési szövegek futnak
+      (aparthotel, saját strand, wellness). Nyári + hosszabb tartózkodás.
+    demographics:
+      age: "30-60"
+      gender: "vegyes"
+      location: ["Németország", "Ausztria"]
+      language: ["de"]
+    psychographics:
+      motivations: ["Balaton-nyaralás", "közvetlen vízpart", "wellness", "ár-érték"]
+      pain_points: ["nyelv", "megbízhatóság", "elérhetőség"]
+      triggers: ["nyári utazástervezés", "Balaton mint desztináció"]
+    best_offers: ["penthouse-nyari-csalados", "piknik-balaton"]
+    winning_angles: ["Direkt am Ufer / közvetlen vízpart", "eigener Strand / saját strand", "private Wellness"]
+    channels: ["Meta (DE célzás)", "Google (DE kulcsszavak)"]
+
+  - id: "csapatepites"
+    name: "Céges / csapatépítés"
+    priority: 4
+    description: "Hajós csapatépítő élmény (Business Escape). Kisebb, de magas AOV szegmens."
+    demographics:
+      age: "25-55"
+      gender: "vegyes"
+      location: ["Budapest", "nagyvárosok"]
+      language: ["hu"]
+    psychographics:
+      motivations: ["csapatélmény", "különleges helyszín", "reprezentáció"]
+      pain_points: ["szervezés", "időpont", "létszám"]
+      triggers: ["céges év vége", "csapatépítő szezon (tavasz-ősz)"]
+    best_offers: ["business-escape-hajos"]
+    winning_angles: ["hajó a Balaton közepén", "ital bekészítés", "egyedi élmény"]
+    channels: ["Meta", "Google", "direkt megkeresés"]
+
+# Szezonális vásárlói momentumok (mikor keresnek aktívan)
+buying_moments:
+  - "Valentin / Red Week (február)"
+  - "Pink Weekend (március eleje)"
+  - "tavaszi last minute (március)"
+  - "nyári szabadság tervezés (március-május) → családok, német turisták"
+  - "nyári főszezon (június-augusztus)"
+  - "Black Week / Black Weekend (november)"
+  - "Mikulás (december eleje)"
+  - "karácsonyi ajándék + karácsonyi tartózkodás (december)"
+  - "évfordulók, születésnapok (egész év, párok)"

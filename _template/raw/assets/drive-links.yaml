@@ -1,0 +1,27 @@
+# ============================================================
+# DRIVE LINKS — vizuális eszközök hivatkozásai (nem fájlok!)
+# A repó szöveg-only; a képek/PDF-ek a Drive-on élnek.
+# ============================================================
+
+client_folder: ""               # a teljes ügyfélmappa Drive URL-je
+
+logo:
+  vector_folder: ""             # vektoros logók mappa
+  files: []                     # konkrét fájl linkek, ha kell
+
+brandbook:
+  drive_url: ""                 # brandbook PDF/doc link
+  format: ""                    # pdf | google-doc | canva
+
+photography:
+  folders:
+    - name: ""                  # pl. "Hotel képek 2025"
+      url: ""
+  notes: ""                     # használati megjegyzés
+
+creatives:                      # korábbi hirdetési kreatívok (referencia)
+  folder: ""
+  by_campaign: []               # pl. [{campaign: "Pink Week", url: "..."}]
+
+ad_copy:                        # hirdetési szövegek (Sheet/xlsx a Drive-on)
+  spreadsheet: ""

@@ -1,0 +1,42 @@
+# ============================================================
+# ROYAL MEDITERRAN — Drive linkek (vizuális eszközök)
+# Forrás: "Royal_mediterran_ugyfelmappa" Drive mappa (2026-07-17).
+# A repó szöveg-only; a képek/PDF-ek a Drive-on élnek.
+# ============================================================
+
+client_folder: "https://drive.google.com/drive/folders/1xwMKSHkaO6oIUpJ3Y6S-klSVeShL4Al0"  # Royal_mediterran_ugyfelmappa
+
+logo:
+  vector_folder: "https://drive.google.com/drive/folders/17l-y26ycZyVK3R7p5sZmMW_3oH7icJCM"  # Logó Vektoros
+  files: []
+
+brandbook:
+  drive_url: ""                 # TODO: van-e brandbook? (színek, tipó) — jelenleg nincs a mappában
+  format: ""
+
+photography:
+  folders:
+    - name: "Kreatívok (korábbi hirdetési grafikák + fotók)"
+      url: "https://drive.google.com/drive/folders/1CvsjBXI8qObpLpgPxcDWapIFYpD-_EjO"
+  notes: >
+    A Kreatívok mappa kampányonként tartalmaz korábbi vizuálokat (pl. 'pink week - delux',
+    'Last minute', 'boat', 'new1-5', 'ad1-3', 'nemet1-3' — német kreatívok). Ezek a
+    'bevált tavalyi grafika' újrahasznosítás forrásai.
+
+creatives:
+  folder: "https://drive.google.com/drive/folders/1CvsjBXI8qObpLpgPxcDWapIFYpD-_EjO"  # Kreatívok
+  by_campaign:
+    - campaign: "Pink Week / Deluxe"
+      note: "pink week- delux.jpg"
+    - campaign: "Last minute"
+      note: "Last minute1-2.jpg"
+    - campaign: "Hajós"
+      note: "boat 1.jpg"
+    - campaign: "Német kreatívok"
+      note: "nemet1.jpg, nemet3.jpg"
+
+ad_copy:
+  # Hirdetési szövegek mappa: HU + DE headline-ok és törzsszövegek
+  folder: "https://drive.google.com/drive/folders/1YGJ6UXHXd2zrauN7LgVv3Y1d5hkeUwqe"  # hirdetési szövegek
+  spreadsheet: "https://drive.google.com/file/d/1uXlIL63phm0Y6rSanHFiISaDWJT907kg/view"  # Royal Mediterran hirdetések.xlsx (HU/DE)
+  year_2026_folder: "https://drive.google.com/drive/folders/11C6HeZZ8TaI4Nh15HFDkOTcUHbLwEvZ9"

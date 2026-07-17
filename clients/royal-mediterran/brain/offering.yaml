@@ -1,0 +1,183 @@
+# ============================================================
+# ROYAL MEDITERRAN — csomagok / árak
+# Forrás: Asana kampány-briefek (2025-2026) + royalmediterran.hu/csomag/*
+# Árak a kampányokban látott értékek; a normál árakat kampányonként ellenőrizd.
+# ============================================================
+
+packages:
+  - id: "penthouse"
+    name: "Penthouse lakosztály szerelmeseknek (saját jakuzzival, félpanzióval)"
+    url: "https://royalmediterran.hu/csomag/penthouse-csomag/"
+    segment: ["parok"]
+    duration: "2 éjszaka / 3 nap"
+    capacity: "2 fő"
+    includes: ["saját panoráma jakuzzi", "félpanzió", "romantikus bekészítés", "Balaton panoráma terasz"]
+    prices:
+      normal_huf: 255300        # BW normál; Red Weeknél 299.900 is szerepelt
+      typical_sale_huf: 119900
+      floor_huf: 99900          # Mikulás / "csak ma" ár
+    validity: "kampányfüggő (jellemzően 2026.12.24-ig)"
+    seasonality: "egész év, kiemelten Valentin, évforduló, ünnepek"
+    hero: true
+    notes: "Zászlóshajó. 'Csak Ma ár' verzió gyakori (pl. Red Week 119.900)."
+
+  - id: "szerelmesek"
+    name: "Szerelmesek csomagja (névre szóló ajándékutalvánnyal)"
+    url: "https://royalmediterran.hu/csomag/szerelmesek-csomagja-nevreszolo-ajandekutalvany/"
+    segment: ["parok"]
+    duration: "2 éjszaka / 3 nap"
+    capacity: "2 fő"
+    includes: ["svédasztalos reggeli", "kerti jakuzzi", "korlátlan szauna", "névre szóló ajándékutalvány"]
+    prices:
+      normal_huf: 119700
+      typical_sale_huf: 59900
+      floor_huf: 54900          # BW / Pink Weekend
+    validity: "jellemzően 2026.04.30-ig"
+    seasonality: "Valentin, Red Week, Pink Weekend, ajándékozási időszakok"
+    hero: true
+    notes: "Ajándékutalvány angle erős (élmény mint ajándék). AI videó is készült rá."
+
+  - id: "romantika-feltoltodes"
+    name: "Romantika és feltöltődés a Balaton partján"
+    url: ""                     # TODO: pontos csomag URL
+    segment: ["parok"]
+    duration: "2 éjszaka / 3 nap"
+    capacity: "2 fő"
+    includes: ["svédasztalos reggeli", "kerti jakuzzi", "korlátlan szauna", "extrák"]
+    prices:
+      normal_huf: 93900
+      typical_sale_huf: 49900
+      floor_huf: 44900
+    validity: "jellemzően 2026.03.31-ig"
+    seasonality: "téli-tavaszi romantika, last minute"
+    hero: false
+
+  - id: "last-minute-teli"
+    name: "Last Minute Téli Romantika pároknak a Balaton partján"
+    url: "https://royalmediterran.hu/csomag/last-minute-teli-romantika-paroknak-a-balaton-partjan/"
+    segment: ["parok"]
+    duration: "2 éjszaka (kuponnal /fő/éj kommunikálva)"
+    capacity: "2 fő"
+    includes: ["korlátlan jakuzzi", "bőséges reggeli", "közvetlen vízpart"]
+    prices:
+      normal_huf: 92900
+      typical_sale_huf: 39900   # Black Week / LASTM kupon
+      floor_huf: 9900           # /fő/éj kommunikáció ("csak 9.900 Ft/fő/éj")
+    validity: "jellemzően 2025.12.24-ig"
+    seasonality: "tél, last minute, limitált készlet"
+    hero: false
+    notes: "Kupon: LASTM2025. Erős sürgetés / limitált darabszám angle."
+
+  - id: "deluxe"
+    name: "Deluxe csomag"
+    url: ""                     # TODO
+    segment: ["parok"]
+    duration: "2 éjszaka / 3 nap"
+    capacity: "2 fő"
+    includes: []               # TODO: pontos tartalom
+    prices:
+      normal_huf: 235900
+      typical_sale_huf: 99900
+      floor_huf: 89900          # "csak ma" ár
+    validity: "kampányfüggő"
+    seasonality: "ünnepi kampányok (Red Week, Pink Weekend)"
+    hero: false
+
+  - id: "piknik-balaton"
+    name: "Piknik a Balatonon (hajós)"
+    url: ""                     # TODO
+    segment: ["parok", "csaladok"]
+    duration: "élmény (hajós piknik)"
+    capacity: "2+ fő"
+    includes: ["hajózás (Deluxe katamarán vagy Speedy hajó)", "piknik bekészítés"]
+    prices:
+      normal_huf: 52900         # Deluxe hajóval; Speedy hajóval 38.900
+      typical_sale_huf: 25900   # Deluxe; Speedy 19.900
+      floor_huf: 19900
+    validity: "szezonális (jó idő)"
+    seasonality: "tavasz-nyár"
+    hero: false
+    notes: "Két hajó-variáns: Deluxe katamarán (drágább) és Speedy hajó (olcsóbb)."
+
+  - id: "lanykeres-hajos"
+    name: "Lánykérés a Balatonon — exkluzív hajós csomag"
+    url: "https://royalmediterran.hu/csomag/lanykeres-a-balatonon-exkluziv-hajos-csomag/"
+    segment: ["parok"]
+    duration: "2 óra hajózás"
+    capacity: "2 fő"
+    includes: ["2 óra Deluxe katamarán", "Moët & Chandon pezsgő", "szőlő & sajttál", "rózsacsokor", "fedélzeti kamera (rögzíti az eseményt)"]
+    prices:
+      normal_huf: 299900
+      typical_sale_huf: 99900
+      floor_huf: 99900
+    validity: "szezonális"
+    seasonality: "tavasz-nyár, évforduló, lánykérés"
+    hero: false
+    notes: "Prémium élménycsomag, magas AOV."
+
+  - id: "business-escape-hajos"
+    name: "Business Escape — hajós csapatépítés (3 óra, ital bekészítéssel)"
+    url: "https://royalmediterran.hu/csomag/business-escape-hajos-csapat-epites-3-ora-ital-bekeszitessel-a-balaton-kozepen/"
+    segment: ["csapatepites"]
+    duration: "3 óra hajózás"
+    capacity: "csapat"
+    includes: ["3 óra hajózás a Balaton közepén", "ital bekészítés"]
+    prices:
+      normal_huf: null          # TODO
+      typical_sale_huf: null
+      floor_huf: null
+    validity: "szezonális"
+    seasonality: "tavasz-nyár-ősz, céges időszak"
+    hero: false
+
+  - id: "karacsony-csalados"
+    name: "Karácsonyozz a teljes családdal — teljes házas csomag"
+    url: "https://royalmediterran.hu/csomag/karacsonyozz-a-teljes-csaladdal-teljes-hazas-csomag/"
+    segment: ["csaladok"]
+    duration: "ünnepi több éjszaka"
+    capacity: "teljes ház / család"
+    includes: []               # TODO
+    prices:
+      normal_huf: null          # TODO
+      typical_sale_huf: null
+      floor_huf: null
+    validity: "karácsony"
+    seasonality: "december"
+    hero: false
+
+  - id: "penthouse-nyari-csalados"
+    name: "Nyári családi apartman (közvetlen vízpart, saját strand)"
+    url: ""                     # TODO: nyári/családos csomag URL
+    segment: ["csaladok", "nemet-turistak"]
+    duration: "több éjszaka"
+    capacity: "család (2 fő + gyerekek)"
+    includes: ["közvetlen Balaton-part", "saját strand", "családbarát apartman", "privát wellness"]
+    prices:
+      normal_huf: null          # TODO: nyári árak
+      typical_sale_huf: null
+      floor_huf: null
+    validity: "nyári szezon"
+    seasonality: "június-augusztus főszezon"
+    hero: true
+    notes: "A HU/DE organikus + nyári hirdetések fő terméke. Ld. hirdetési szövegek.xlsx."
+
+# ------------------------------------------------------------
+# Kuponok / akció-kódok (ékezet nélkül, nagybetűvel)
+coupons:
+  - code: "MIKULAS40"
+    context: "Mikulás kampány (december eleje)"
+    discount: "Penthouse 99.900 Ft-ra"
+  - code: "KARACSONY20"
+    context: "Karácsonyi kampány (dec 19+)"
+    discount: "TODO"
+  - code: "LASTM2025"
+    context: "Last minute téli csomag"
+    discount: "39.900 Ft (dec 10-24)"
+
+# Upsell / cross-sell
+addons:
+  - "hajózás (Deluxe katamarán / Speedy hajó)"
+  - "ajándék hajózás (kampány-hook, pl. 'ajándék hajózással')"
+  - "pezsgős / szőlő-sajttál bekészítés"
+  - "masszázs / páros kényeztetés"
+  - "névre szóló ajándékutalvány"

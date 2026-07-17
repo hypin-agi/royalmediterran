@@ -1,0 +1,40 @@
+# ============================================================
+# BRAND — hangvétel, vizuális arculat, nyelvi szabályok
+# Ez táplálja: ad copy, social, hírlevél, image promptok.
+# ============================================================
+
+voice:
+  personality: []               # 3-5 jelző, pl. ["meleg", "élményközpontú", "prémium de elérhető"]
+  tone_by_context:
+    ads: ""                     # pl. "sürgető, érzelmi, konkrét ár"
+    social: ""                  # pl. "barátságos, inspiráló, sok emoji"
+    newsletter: ""
+  person: ""                    # tegező / magázó
+  emoji_usage: ""               # sok / mérsékelt / nincs
+  signature_phrases: []         # visszatérő fordulatok, szlogen
+  reading_level: ""             # pl. "egyszerű, mindenki érti"
+
+language:
+  primary: ""                   # pl. "hu"
+  additional: []                # pl. ["de"]
+  spelling_notes: ""            # pl. "ékezet nélküli kuponkódok"
+
+visual:
+  logo_drive: ""                # link a raw/assets/drive-links.yaml-ből
+  colors:
+    primary: ""                 # HEX
+    secondary: ""
+    accent: ""
+    sale_highlight: ""          # pl. "piros áthúzáshoz"
+  fonts: []
+  photography_style: ""         # pl. "napfényes, életszerű, vízparti"
+  mood: []                      # pl. ["romantikus", "nyári", "prémium"]
+  logo_usage_rules: ""
+
+# BEVÁLT KREATÍV KONVENCIÓK (a "szokásos koncepció" kodifikálva)
+creative_conventions:
+  price_block: ""               # pl. "áthúzott normál ár piros + akciós ár nagyban + Ft megtakarítás"
+  discount_display: []          # pl. ["forintosított", "százalékos", "/fő/éj bontás"]
+  urgency_elements: []          # pl. ["Csak Ma ár", "UTOLSÓ NAP", érvényesség dátum]
+  formats_per_campaign: []      # pl. ["1 statikus", "1 AI mozgó videó", "1 beszélős AI videó"]
+  coupon_style: ""              # pl. "ékezet nélkül, nagybetűvel, pl. MIKULAS40"

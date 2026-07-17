@@ -1,0 +1,66 @@
+# ============================================================
+# ROYAL MEDITERRAN — brand, hangvétel, kreatív konvenciók
+# Forrás: hirdetési szövegek.xlsx (HU/DE), Asana kreatív-briefek.
+# ============================================================
+
+voice:
+  personality: ["meleg", "érzelmi / érzékszervi", "élményközpontú", "hívogató", "prémium de elérhető"]
+  tone_by_context:
+    ads: "érzelmi + konkrét ár/sürgetés; jelenetbe helyez ('Képzeld el, hogy...')"
+    social: "inspiráló, vízparti hangulat, élménymegosztás"
+    newsletter: "közvetlen, akció-fókuszú, egyértelmű CTA (MailerLite)"
+  person: "tegező"
+  emoji_usage: "mérsékelt (nyári/romantikus hangulatjelek beleférnek)"
+  signature_phrases:
+    - "Közvetlen Balaton-parti pihenés"
+    - "a strand a lábad előtt"
+    - "Ébredj a Balaton hullámainak hangjára"
+    - "Foglalj most, és teremts életre szóló balatoni emlékeket"
+    - "az élmény mindig jó ajándék"
+  reading_level: "egyszerű, érzelmes, mindenki érti"
+
+language:
+  primary: "hu"
+  additional: ["de"]
+  spelling_notes: "kuponkódok ÉKEZET NÉLKÜL, nagybetűvel (pl. MIKULAS40, LASTM2025)"
+
+visual:
+  logo_drive: "https://drive.google.com/drive/folders/17l-y26ycZyVK3R7p5sZmMW_3oH7icJCM"  # Logó Vektoros
+  colors:
+    primary: ""                 # TODO: HEX a logóból / brandbookból
+    secondary: ""               # TODO
+    accent: ""                  # TODO
+    sale_highlight: "piros"     # áthúzott ár piros színnel
+  fonts: []                     # TODO: brandbookból
+  photography_style: "napfényes, életszerű, vízparti; romantikus jakuzzi/terasz jelenetek; Balaton panoráma"
+  mood: ["romantikus", "nyári", "vízparti", "prémium", "családi (nyári vonalon)"]
+  logo_usage_rules: ""          # TODO
+
+# ------------------------------------------------------------
+# BEVÁLT KREATÍV KONVENCIÓK — a "szokásos koncepció" kodifikálva
+# (Ezt kéri Levi rendszeresen a grafikusoktól — pontosan tartsd be.)
+creative_conventions:
+  price_block: >
+    Áthúzott normál ár (PIROS áthúzás) + nagy akciós ár + a megtakarítás kiemelve.
+    Az akció érvényessége mindig szerepel és ki van emelve (pl. 'Az akció kizárólag SZOMBATIG érvényes').
+  discount_display:
+    - "forintosított kedvezmény (Ft-ban a megtakarítás)"
+    - "százalékos kedvezmény (%)"
+    - "/fő/éj bontás (pl. 'csak 9.900 Ft/fő/éj')"
+  urgency_elements:
+    - "Csak Ma ár (kiemelt, adott napra)"
+    - "UTOLSÓ NAP! verzió"
+    - "limitált darabszám / last minute"
+    - "érvényességi dátum kiemelése"
+  formats_per_campaign:
+    - "1 db statikus grafika"
+    - "1 db AI mozgó (mozgó jelenetes) videó"
+    - "1 db beszélős AI videó"
+  coupon_style: "ékezet nélkül, NAGYBETŰVEL (pl. MIKULAS40, KARACSONY20, LASTM2025)"
+  themed_campaign_names:
+    - "RED WEEK (Valentin)"
+    - "PINK WEEKEND"
+    - "BLACK WEEK / BLACK WEEKEND"
+  notes: >
+    Visszatérő igény: 'a grafika legyen ugyanaz mint tavaly, mert nagyon mentünk vele' —
+    a bevált kampány-vizuálokat évről évre újrahasznosítjuk, csak ár/dátum frissül.

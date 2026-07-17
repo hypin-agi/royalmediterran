@@ -1,0 +1,60 @@
+# ============================================================
+# MASTER METAADAT — gépi belépési pont az ügyfélhez
+# Másold ki új ügyfélhez és töltsd ki. Minden mező kötelező,
+# kivéve amit "opcionális" jelöl.
+# ============================================================
+
+client:
+  slug: ""                      # url-barát azonosító, pl. "royal-mediterran"
+  name: ""                      # hivatalos név
+  legal_name: ""                # cégnév (számlázási), opcionális
+  website: ""                   # fő URL
+  industry: ""                  # pl. "hotel / wellness / vendéglátás"
+  languages: []                 # pl. ["hu", "de"]
+  markets: []                   # célországok, pl. ["HU", "DE", "AT"]
+  status: "active"              # active | paused | offboarded
+  onboarded: ""                 # YYYY-MM-DD
+
+# Kapcsolattartók (ügynökség + ügyfél oldal)
+contacts:
+  agency:
+    account_manager: ""         # ki viszi a fiókot
+    graphics: ""                # grafikus(ok)
+    ads: ""                     # PPC felelős
+  client:
+    primary: ""                 # ügyfél fő kontakt
+    email: ""
+    phone: ""
+
+# Külső rendszerek és linkek (a "hol van az adat" térkép)
+systems:
+  google_ads:
+    account_id: ""
+    looker_studio: ""           # riport URL
+  meta_ads:
+    business_id: ""
+    ad_account_id: ""
+  analytics:
+    ga4_property: ""
+  cms:
+    platform: ""                # pl. WordPress
+    admin_url: ""
+  email_marketing:
+    platform: ""                # pl. MailerLite
+  booking_pms:
+    platform: ""                # pl. SabeeApp (hotel PMS)
+  social:
+    instagram: ""
+    facebook: ""
+    tiktok: ""
+  project_mgmt:
+    asana_project: ""           # Asana projekt URL
+  drive:
+    client_folder: ""           # Google Drive ügyfélmappa URL
+
+# Gyors egészség-metrikák (kézzel frissíted riportnál)
+snapshot:
+  last_updated: ""              # YYYY-MM-DD
+  monthly_ad_budget_huf: null
+  primary_kpi: ""               # pl. "ROAS", "foglalás", "bevétel/nap"
+  notes: ""

@@ -1,0 +1,27 @@
+# ============================================================
+# OFFERING — termékek / csomagok / árak
+# Ez táplálja: minden ajánlat-alapú kreatív, PPC, landing.
+# ============================================================
+
+packages:
+  - id: ""                      # rövid azonosító, pl. "szerelmesek"
+    name: ""                    # marketing név
+    url: ""                     # csomag oldal URL
+    segment: []                 # kinek szól (audience.yaml segment id)
+    duration: ""                # pl. "2 éjszaka / 3 nap"
+    capacity: ""                # pl. "2 fő"
+    includes: []                # tartalom listája
+    prices:
+      normal_huf: null          # normál/áthúzott ár
+      typical_sale_huf: null    # szokásos akciós ár
+      floor_huf: null           # legalacsonyabb, amit szoktunk (last minute)
+    validity: ""                # meddig felhasználható
+    seasonality: ""             # mikor tolható leginkább
+    hero: false                 # zászlóshajó ajánlat?
+    notes: ""
+
+# Kupon / akció konvenciók
+coupons: []                     # pl. [{code: "MIKULAS40", context: "Mikulás", discount: "..."}]
+
+# Upsell / cross-sell lehetőségek
+addons: []                      # pl. ["hajózás", "masszázs", "pezsgős bekészítés"]
