@@ -1,0 +1,41 @@
+Blokk,Tétel,Részlet / instrukció,Felelős,Prioritás
+0) ÖSSZEFOGLALÓ,Cél,"Nyári bevétel most: párok/romantika Purchase-motor viszi a keretet, mellé tesztelt nyári nyaralás-réteg",—,—
+0) ÖSSZEFOGLALÓ,Adatalap,"Meta hirdetés-szintű export 241 hirdetés; párok ROAS 6-8, statikus kép >> videó, Purchase=vásárlások 84%-a",—,—
+0) ÖSSZEFOGLALÓ,Blended ROAS cél,≥ 4.0 (mérhető átlag 4.61),PPC,—
+0) ÖSSZEFOGLALÓ,CPA cél,~10-13.000 Ft/foglalás (plafon 15.000),PPC,—
+1) KAMPÁNY,NY-CORE Párok Purchase,"Objective Purchase(value); ad set: csomag-nevű ABO (Penthouse/Deluxe/Szerelmesek) + broad/Advantage+ + LAL vásárlók 1-3%; keret 42% (~252e/hó)",PPC,P1
+1) KAMPÁNY,NY-SUM Nyári nyaralás,"Objective Purchase/LPV; ad set: HU nyaralás-interest + Siófok+15km + Budapest catchment + 'ide utazók'; keret 20% (~120e/hó)",PPC,P1
+1) KAMPÁNY,NY-BOF Remarketing,"Objective Purchase; ad set: csomag-oldal látogatók + checkout-elhagyók + MailerLite LAL; keret 18% (~108e/hó)",PPC,P1
+1) KAMPÁNY,NY-EXP Hajós élmény,"Objective Purchase; Piknik a Balatonon 25.900; keret 10% (~60e/hó)",PPC,P2
+1) KAMPÁNY,NY-DE DE teszt,"Objective Purchase (NEM Lead); DE/AT nyaralás-interest natív német kreatív; capelt 5% (~30e/hó); CPA-küszöbre kilövés",PPC,P2
+1) KAMPÁNY,NY-TOF awareness,"Rövid/AI videó RM-feltöltésre; keret 5% (~30e/hó); NEM konverziós",PPC,P3
+2) BEÁLLÍTÁS,Optimalizálás,"Purchase esemény (fb_pixel_purchase), value+HUF — NE AddToCart-ra",PPC,P1
+2) BEÁLLÍTÁS,Attribúció,7 napos klikk / 1 napos nézés,PPC,P1
+2) BEÁLLÍTÁS,Bid,Highest volume (CBO) -> később ROAS/cost cap ~4.0,PPC,P2
+2) BEÁLLÍTÁS,Placement,Advantage+ Placements,PPC,P2
+2) BEÁLLÍTÁS,Naming,RM | PURCHASE | [Csomag] | HU,PPC,P2
+2) BEÁLLÍTÁS,Kizárás,elmúlt 30-90 nap vásárlók kizárása a Purchase-ből (kivéve upsell),PPC,P2
+3) KIVEZETNI,Always-on boost,"584e Ft költés / ROAS 0.07 — azonnal leállítani",PPC,P1
+3) KIVEZETNI,AddToCart konverzió,"9 hirdetés / 4 vásárlás — Purchase-re váltani",PPC,P1
+3) KIVEZETNI,Generikus interest (főoldal),"275e Ft / 0 vásárlás — leállítani",PPC,P1
+3) KIVEZETNI,DE lead-form,"161.564 Ft/lead — leállítani, Purchase-teszt helyette",PPC,P1
+3) KIVEZETNI,donate_website esemény,"rossz esemény (SabeeApp konverzió) — pixel/CAPI mapping javítása",PPC/Web,P1
+4) KREATÍV,Formátum-prioritás,"1. statikus ár-blokk KÉP (konvertál, ROAS 4.5); 2. videó csak awareness",Grafikus,P1
+4) KREATÍV,Ár-blokk recept,áthúzott normál ár (piros/arany) + nagy akciós ár + Ft megtakarítás + érvényesség dátum,Grafikus,P1
+4) KREATÍV,Penthouse kép,"Headline 'Penthouse – saját jakuzzi, privát Balaton-part'; ár-blokk 255.300->119.900",Grafikus,P1
+4) KREATÍV,Deluxe 99e kép,"a bevált nyerő minta (ROAS 7.91); Deluxe 235.900->99.900 ár-blokk",Grafikus,P1
+4) KREATÍV,Szerelmesek kép,"Szerelmesek csomagja 119.700->69.900; ajándékutalvány angle",Grafikus,P1
+4) KREATÍV,Nyári apartman kép,"'Balatoni nyaralás Siófokon privát partszakasszal'; saját strand; ROYAL5 5%",Grafikus,P1
+4) KREATÍV,Szabad hely / sürgetés,"'Még foglalhatóak nyári időpontok'; ROYAL5; szabad kapacitásra",Grafikus,P1
+4) KREATÍV,Hajós piknik kép,"'Hajós piknik a Balatonon'; Piknik 25.900 / Deluxe hajó",Grafikus,P2
+4) KREATÍV,DE nyári kép,"'Direkt am Ufer des Balaton – eigener Strand'; natív német",Grafikus,P2
+4) KREATÍV,Méretek,Feed 1:1 (1080x1080) + Story/Reels 9:16 (1080x1920); ad set-enként min 3 variáns,Grafikus,P2
+4) KREATÍV,Kupon-stílus,ékezet nélkül NAGYBETŰVEL (ROYAL5),Grafikus,P2
+5) CÉLZÁS,Csomag-nevű ABO,"minden fő csomagra külön ad set — a nyerők (ROAS 7-12)",PPC,P1
+5) CÉLZÁS,Broad / Advantage+,skálázó ad set (ROAS 4.95),PPC,P1
+5) CÉLZÁS,Geo,Siófok +15km + Budapest catchment (fő küldő-piac) + Balatonra utazók,PPC,P2
+5) CÉLZÁS,Lookalike,vásárlók LAL 1-3% hideg feltöltésre,PPC,P2
+5) CÉLZÁS,Remarketing,csomag-oldal látogatók (kész audience-struktúra),PPC,P2
+6) MÉRÉS,Havi reconciliáció,Meta ROAS <-> SabeeApp (PMS) valós foglalás,PPC/Ügyfél,P2
+6) MÉRÉS,Heti optimalizálás,"CTR, frequency < 2.5, ROAS ad set szinten; kimerülő kreatív csere",PPC,P2
+6) MÉRÉS,Szabad kapacitás,csak szabad nyári dátumra hirdetünk (SabeeApp egyeztetés),PPC/Ügyfél,P1
