@@ -1,0 +1,328 @@
+<!doctype html>
+<html lang="hu">
+<head>
+<meta charset="utf-8">
+<title>Royal Mediterran – Meta Ads Kampányterv v1.1 (valós adat)</title>
+<style>
+  @page { size: A4; margin: 18mm 16mm 20mm 16mm; }
+  * { box-sizing: border-box; }
+  html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body {
+    font-family: "Helvetica Neue", Arial, sans-serif;
+    color: #1f2a30; font-size: 10.5px; line-height: 1.5; margin: 0;
+  }
+  h1,h2,h3 { color: #0f4c5c; margin: 0 0 6px; line-height: 1.2; }
+  h2 { font-size: 16px; border-bottom: 2px solid #2a9d8f; padding-bottom: 4px; margin-top: 22px; }
+  h3 { font-size: 12.5px; color: #14746f; margin-top: 14px; }
+  p { margin: 0 0 8px; }
+  a { color: #0f4c5c; }
+  small { color: #5b6b72; }
+  .muted { color: #5b6b72; }
+  table { width: 100%; border-collapse: collapse; margin: 8px 0 12px; font-size: 9.5px; }
+  th, td { border: 1px solid #cdd9dd; padding: 5px 7px; text-align: left; vertical-align: top; }
+  th { background: #0f4c5c; color: #fff; font-weight: 600; }
+  tbody tr:nth-child(even) { background: #f2f7f7; }
+  .pill { display: inline-block; padding: 1px 7px; border-radius: 10px; font-size: 8.5px; font-weight: 700; color:#fff; }
+  .tof { background:#2a9d8f; } .mof { background:#e9a12e; } .bof { background:#e63946; }
+  .win { background:#2a9d8f; } .lose { background:#b23a48; }
+  .callout { background:#eef6f5; border-left:4px solid #2a9d8f; padding:9px 12px; margin:10px 0; border-radius:0 6px 6px 0; }
+  .callout.data { background:#fff4e6; border-left-color:#e9a12e; }
+  .callout.warn { background:#fdecee; border-left-color:#e63946; }
+  .kpi-grid { display:flex; gap:8px; margin:10px 0; }
+  .kpi { flex:1; background:#0f4c5c; color:#fff; border-radius:8px; padding:10px; text-align:center; }
+  .kpi.g { background:#2a9d8f; }
+  .kpi .n { font-size:17px; font-weight:800; display:block; }
+  .kpi .l { font-size:8px; text-transform:uppercase; letter-spacing:.4px; opacity:.85; }
+  ul { margin:4px 0 8px; padding-left:16px; } li { margin-bottom:3px; }
+  .cover { text-align:center; padding-top:56px; page-break-after:always; }
+  .cover .brand { font-size:12px; letter-spacing:3px; text-transform:uppercase; color:#2a9d8f; font-weight:700; }
+  .cover h1 { font-size:30px; margin:18px 0 8px; }
+  .cover .sub { font-size:13px; color:#5b6b72; }
+  .cover .band { margin:34px auto 0; width:70%; height:5px; background:linear-gradient(90deg,#0f4c5c,#2a9d8f,#e9c46a,#e63946); border-radius:3px; }
+  .cover .meta { margin-top:40px; font-size:10px; color:#5b6b72; }
+  .cover .badge { display:inline-block; margin-top:14px; background:#2a9d8f; color:#fff; font-weight:700; font-size:11px; padding:5px 14px; border-radius:16px; letter-spacing:.5px; }
+  .section { page-break-inside:avoid; }
+  code { background:#eef1f2; padding:1px 4px; border-radius:3px; font-size:9px; }
+  .adcopy { background:#fbf7ef; border:1px solid #e9dcc2; border-radius:6px; padding:8px 10px; margin:6px 0; }
+  .adcopy .hl { font-weight:700; color:#0f4c5c; }
+  .foot { margin-top:26px; padding-top:8px; border-top:1px solid #cdd9dd; font-size:8.5px; color:#8a979d; }
+  .tag-new { background:#e63946; color:#fff; font-size:7.5px; font-weight:700; padding:1px 5px; border-radius:8px; vertical-align:middle; letter-spacing:.3px; }
+</style>
+</head>
+<body>
+
+<div class="cover">
+  <div class="brand">Hypin' &nbsp;×&nbsp; Royal Mediterran</div>
+  <h1>Meta Ads Kampányterv</h1>
+  <div class="sub">Royal Mediterran Aparthotel · Balaton, Siófok · 2026 H2 (nyár–tél)</div>
+  <div class="band"></div>
+  <div class="badge">v1.1 — VALÓS Meta-adatra kalibrálva</div>
+  <div class="meta">
+    Készült: 2026. július 17. · Készítette: Hypin' · Verzió: <strong>1.1</strong><br>
+    Adatalap: Sparadise Kft. Meta-fiók export (2023.06.17 – 2026.07.16) + elmúlt 30 nap<br>
+    Hatókör: jelenleg elérhető csomagok · elsődlegesen HU piac<br>
+    <strong>Címzett: PPC kolléga (média-beállítás &amp; optimalizálás)</strong>
+  </div>
+</div>
+
+<!-- 1 -->
+<div class="section">
+<h2>1. Vezetői összefoglaló</h2>
+<div class="callout"><strong>Mi változott v1.0 → v1.1:</strong> a terv immár a <strong>tényleges Meta Ads exportra</strong> épül (Drive → <em>Royal_mediterran_meta_ads</em>). A célok, a budget-arányok és a kampányváz a <strong>mért ROAS/CPA</strong> alapján lettek átírva — nem iparági becslésből.</div>
+<p>A fiók (jogilag <strong>Sparadise Kft.</strong>) egy helyen kezeli a szálloda-csomagokat, a <strong>hajóbérlést</strong>, a <strong>Sunset Bar</strong>-t és az álláshirdetéseket. A szálloda-marketinget ettől elkülönítve kezeljük. A mért adat egyértelmű üzenetet ad:</p>
+<ul>
+  <li><strong>A pénztermelő motor a Purchase-objective + CBO kampány</strong> („Purchase - csomagok”): <strong>ROAS 5,18</strong> élettartamon (~10,2 M Ft költés, 1122 vásárlás, CPA ~9 133 Ft), nyáron is <strong>ROAS 4,66</strong>. → Ide megy a keret zöme.</li>
+  <li><strong>A Traffic / Engagement / AddToCart kampányok alulteljesítenek</strong> (ROAS &lt; 1, a cart-optimalizált kampányok 0 vásárlással). → Csak olcsó remarketing-üzemanyagként, nem fő pénzként.</li>
+  <li><strong>A német (DE) lead-gen egyelőre nem térült meg</strong> Meta-n (161 564 Ft / 1 lead). → A DE-t átpozicionáljuk Purchase-objective tesztté, kis capelt kerettel.</li>
+</ul>
+<div class="kpi-grid">
+  <div class="kpi g"><span class="n">5,18</span><span class="l">Mért ROAS (flagship, élettartam)</span></div>
+  <div class="kpi g"><span class="n">~9 100 Ft</span><span class="l">Mért CPA (flagship)</span></div>
+  <div class="kpi"><span class="n">≥ 4,0</span><span class="l">Blended ROAS cél</span></div>
+  <div class="kpi"><span class="n">Purchase</span><span class="l">Nyerő objective</span></div>
+</div>
+</div>
+
+<!-- 2 -->
+<div class="section">
+<h2>2. Mit mutat a valós Meta adat <span class="tag-new">ÚJ</span></h2>
+<p>Két export beolvasva: teljes élettartam (2023.06.17–2026.07.16) és az elmúlt 30 nap (nyári csúcs). A számok <strong>Meta-riportáltak</strong> — havonta a SabeeApp (PMS) valós foglalással reconciliálandók (ld. 11. pont), de az irány konzisztens.</p>
+<table>
+<thead><tr><th>Kampány</th><th>Objective</th><th>Költés (Ft)</th><th>Vásárlás</th><th>CPA (Ft)</th><th>ROAS</th><th></th></tr></thead>
+<tbody>
+<tr><td><strong>Purchase - csomagok</strong></td><td>Purchase (pixel)</td><td>10 247 671</td><td>1 122</td><td>9 133</td><td><strong>5,18</strong></td><td><span class="pill win">NYERŐ</span></td></tr>
+<tr><td>Purchase v2</td><td>Purchase</td><td>132 430</td><td>6</td><td>22 072</td><td>2,83</td><td></td></tr>
+<tr><td>Traffic - Hajóbérlés <small>(vízisport, külön)</small></td><td>Landing page view</td><td>1 753 923</td><td>–</td><td>–</td><td>1,21</td><td></td></tr>
+<tr><td>2-Traffic</td><td>Traffic</td><td>701 002</td><td>–</td><td>–</td><td>0,87</td><td><span class="pill lose">GYENGE</span></td></tr>
+<tr><td>Conversion (traffic)</td><td>Traffic</td><td>1 708 983</td><td>–</td><td>–</td><td>0,59</td><td><span class="pill lose">GYENGE</span></td></tr>
+<tr><td>Conversion (cart) / addtocart_2025</td><td>AddToCart</td><td>1 723 452 / 935 703</td><td>0</td><td>–</td><td>üres</td><td><span class="pill lose">0 vásárlás</span></td></tr>
+<tr><td>Postboost / Post boost</td><td>Engagement</td><td>116 096 / 91 555</td><td>2 / 1</td><td>–</td><td>0,69 / 0,24</td><td><span class="pill lose">GYENGE</span></td></tr>
+<tr><td>Német - traffic / Lead</td><td>Traffic / Lead</td><td>146 021 / 161 564</td><td>0 / 1 lead</td><td>– / 161 564</td><td>üres</td><td><span class="pill lose">NEM TÉRÜLT</span></td></tr>
+<tr><td>Lengyel - Lead</td><td>Lead</td><td>124 521</td><td>0</td><td>–</td><td>üres</td><td>teszt</td></tr>
+<tr><td>Sabeeapp Conversion <small>(rossz eseményre)</small></td><td>donate_website (!)</td><td>88 357</td><td>1</td><td>88 357</td><td>üres</td><td><span class="pill lose">esemény-hiba</span></td></tr>
+</tbody>
+</table>
+<p class="muted"><small>Elmúlt 30 nap (nyár): Purchase - csomagok ROAS <strong>4,66</strong> / CPA 14 796 Ft / 11 vásárlás · Traffic-Hajóbérlés ROAS 1,46 · DE Lead CPM 1 849 Ft, 0 eredmény.</small></p>
+<div class="callout data"><strong>3 tanulság a PPC-nek:</strong>
+<strong>(1)</strong> Purchase objective + CBO = a pénz. Ide koncentrálj. &nbsp;
+<strong>(2)</strong> AddToCart-ra NE optimalizálj (2,66 M Ft ment el 0 vásárlásért) — Purchase esemény a cél. &nbsp;
+<strong>(3)</strong> DE lead-form leáll; a hajóbérlés/bár külön termékvonal, külön riport.</div>
+</div>
+
+<!-- 3 -->
+<div class="section">
+<h2>3. Célok &amp; KPI-k (valós benchmarkra állítva) <span class="tag-new">ÚJ</span></h2>
+<table>
+<thead><tr><th>Szint</th><th>KPI</th><th>Cél</th><th>Alap (mért)</th></tr></thead>
+<tbody>
+<tr><td>Fiók</td><td>Blended ROAS</td><td>≥ 4,0</td><td>flagship 4,66–5,18 → 4,0 konzervatív blended</td></tr>
+<tr><td>BOF / Purchase</td><td>Kampány ROAS</td><td>floor 4,0 · cél 5,0</td><td>„Purchase - csomagok” 5,18 élettartam</td></tr>
+<tr><td>BOF / Purchase</td><td>CPA (foglalás)</td><td>cél ~10 000 Ft · plafon ~15 000 Ft</td><td>9 133 élettartam / 14 796 nyári csúcs</td></tr>
+<tr><td>MOF/RM</td><td>Remarketing ROAS</td><td>≥ 6,0</td><td>meleg közönség, a hideg felett — de a régi 8,0 becslés lejjebb véve valós CPA-hoz</td></tr>
+<tr><td>TOF</td><td>CTR (link) / hook</td><td>≥ 1,2% · ThruPlay-teszt</td><td>kreatív-egészség jelző (TOF ROAS reálisan &lt; 1)</td></tr>
+<tr><td>Fiók</td><td>Frequency</td><td>&lt; 2,5</td><td>kreatív-kifáradás elleni korlát</td></tr>
+</tbody>
+</table>
+<div class="callout"><strong>Fontos elvárás-kalibráció:</strong> a TOF/traffic önmagában &lt; 1 ROAS-t ad — ez a valós adatban is így van, és ez rendben van, mert a TOF a hideg közönséget építi a Purchase-kampánynak. A <strong>fiók-szintű ROAS-t a Purchase-kampány húzza fel</strong>, ezért annak az egészségét figyeljük elsőként.</div>
+</div>
+
+<!-- 4 -->
+<div class="section">
+<h2>4. Kampánystruktúra — Purchase-központú váz <span class="tag-new">ÚJ</span></h2>
+<p>A v1.0 full-funnel váz megmarad, de a súlypont a bizonyított <strong>Purchase-objective</strong> kampányra tolódik. A hajóbérlés/bár kampányok <strong>külön</strong> maradnak (nem részei ennek a szálloda-tervnek és -budgetnek).</p>
+<table>
+<thead><tr><th>Kampány</th><th>Objective</th><th>Ad set-ek</th><th>Budget-logika</th></tr></thead>
+<tbody>
+<tr><td><strong>RM-CORE · Purchase (csomagok)</strong></td><td><strong>Vásárlás (Purchase, value)</strong></td><td>1) broad/Advantage+ · 2) érdeklődés (wellness/romantika) · 3) LAL vásárlók 1–3%</td><td><strong>CBO, a keret magja</strong> — a bevált nyerő folytatása</td></tr>
+<tr><td>RM-BOF · Remarketing konverzió</td><td>Vásárlás</td><td>1) csomag-oldal nézők · 2) checkout-elhagyók · 3) hírlevél-lista (MailerLite) LAL</td><td>CBO, vásárlók kizárva</td></tr>
+<tr><td>RM-TOF · Hideg feltöltés</td><td>Purchase (broad) v. Videó-nézés</td><td>1) HU párok · 2) HU családok (nyár) · 3) LAL</td><td>CBO, kreatív-rotáció; RM-közönség táplálása</td></tr>
+<tr><td>RM-EVR · Páros evergreen</td><td>Vásárlás</td><td>1) HU párok hideg · 2) romantika RM</td><td>ABO, egész éves, kis keret</td></tr>
+<tr><td>RM-DE · DE teszt <span class="tag-new">ÚJ logika</span></td><td><strong>Vásárlás</strong> (NEM Lead)</td><td>1) DE apartman, HU-nyerő kreatív natív német fordítással</td><td>ABO, <strong>capelt</strong> keret, CPA-küszöbre kilövés</td></tr>
+<tr><td>RM-PREM · Prémium alkalom</td><td>Vásárlás / Lead</td><td>1) Lánykérés · 2) Business Escape (céges)</td><td>ABO, kis keret, magas AOV</td></tr>
+</tbody>
+</table>
+<div class="callout warn"><strong>Amit a v1.0-hoz képest kivezetünk:</strong> önálló <strong>AddToCart-optimalizált</strong> konverziós kampány (0 vásárlást hozott 2,66 M Ft-ért), a <strong>DE lead-form</strong> (161 k Ft/lead), és a nagy <strong>traffic/boost</strong> keretek mint fő motor. A boost/traffic maradhat, de csak minimál kerettel, RM-feltöltésre.</div>
+</div>
+
+<!-- 4B PPC setup -->
+<div class="section">
+<h2>4/B. Kampány-beállítások &amp; naming (PPC setup)</h2>
+<h3>Ajánlott beállítások (a mért nyerő alapján)</h3>
+<table>
+<thead><tr><th>Paraméter</th><th>RM-CORE / BOF (Purchase)</th><th>TOF / feltöltés</th></tr></thead>
+<tbody>
+<tr><td>Optimalizálás</td><td><strong>Purchase (value)</strong> — <code>fb_pixel_purchase</code></td><td>Landing page nézés / ThruPlay</td></tr>
+<tr><td>Bid-stratégia</td><td>Highest volume (CBO) → később cost/ROAS cap ~4,0-nál</td><td>Highest volume (CBO)</td></tr>
+<tr><td>Attribúció</td><td><strong>7-nap klikk / 1-nap nézés</strong> (a nyerők ezen futnak)</td><td>7-nap klikk / 1-nap nézés</td></tr>
+<tr><td>Placement</td><td>Advantage+ Placements</td><td>Advantage+ Placements</td></tr>
+<tr><td>Költségkeret</td><td>CBO kampány-szinten</td><td>CBO kampány-szinten</td></tr>
+<tr><td>Learning védelem</td><td colspan="2">cél ~50 vásárlás/hét felé kampányszinten; ne szerkessz aktív tanulás alatt; emelés ~20% / 2-3 nap</td></tr>
+</tbody>
+</table>
+<h3>Naming konvenció</h3>
+<ul>
+  <li><strong>Kampány:</strong> <code>RM | [OBJ] | [TÉMA] | [PIAC]</code> — pl. <code>RM | PURCHASE | Csomagok | HU</code></li>
+  <li><strong>Ad set:</strong> <code>[KÖZÖNSÉG] | [KOR] | [PLACEMENT]</code> — pl. <code>LAL3%_Vasarlok | 27-55 | Adv+</code></li>
+  <li><strong>Hirdetés:</strong> <code>[FORMA] | [ANGLE] | [VERZIÓ]</code> — pl. <code>Statikus | Ar-blokk | v2</code></li>
+</ul>
+<h3>Kizárások (kötelező)</h3>
+<ul>
+  <li>Purchase/BOF kampányból: elmúlt 30–90 nap <strong>vásárlók</strong> kizárása (kivéve évforduló-upsell).</li>
+  <li><strong>Szálloda ≠ hajóbérlés/bár:</strong> külön kampány, külön közönség, külön riport — ne keveredjen a ROAS.</li>
+  <li>DE és HU közönség szétválasztva (nyelv + földrajz).</li>
+</ul>
+<div class="callout"><strong>Szabad kapacitás szabály:</strong> csak arra a csomagra/dátumra kapcsolunk hirdetést, amire van szabad kapacitás (<strong>SabeeApp</strong> egyeztetés) — elkerülve az „elköltött budget foglalás nélkül” esetet.</div>
+</div>
+
+<!-- 5 -->
+<div class="section">
+<h2>5. Budget-allokáció — Purchase-re súlyozva <span class="tag-new">ÚJ</span></h2>
+<p>Munka-feltételezés: <strong>~600 000 Ft / hó</strong> (≈ 20 000 Ft/nap). A tényleges kerethez igazítandó; az arányok a mért teljesítményt tükrözik (a nyerő Purchase-kampány kapja a legtöbbet, a v1.0-hoz képest a TOF-ról átsúlyozva).</p>
+<table>
+<thead><tr><th>Kampány</th><th>v1.0 arány</th><th>v1.1 arány</th><th>Havi keret (példa)</th><th>Indok (mért)</th></tr></thead>
+<tbody>
+<tr><td>RM-CORE Purchase (csomagok)</td><td>–</td><td><strong>40%</strong></td><td>240 000 Ft</td><td>ROAS 5,18 — a bizonyított motor</td></tr>
+<tr><td>RM-BOF Remarketing konverzió</td><td>25%</td><td><strong>20%</strong></td><td>120 000 Ft</td><td>meleg közönség, magas ROAS</td></tr>
+<tr><td>RM-TOF Hideg feltöltés</td><td>40%</td><td><strong>18%</strong></td><td>108 000 Ft</td><td>traffic ROAS &lt; 1 → csökkentve, csak feltöltésre</td></tr>
+<tr><td>RM-EVR Páros evergreen</td><td>12%</td><td><strong>12%</strong></td><td>72 000 Ft</td><td>egész éves páros bevétel</td></tr>
+<tr><td>RM-PREM Prémium + céges</td><td>8%</td><td><strong>5%</strong></td><td>30 000 Ft</td><td>magas AOV, mindig-on</td></tr>
+<tr><td>RM-DE DE teszt (capelt)</td><td>(TOF-ban)</td><td><strong>5%</strong></td><td>30 000 Ft</td><td>lead nem térült → Purchase-teszt, kilövéssel</td></tr>
+<tr><td><strong>Összesen</strong></td><td>100%</td><td><strong>100%</strong></td><td><strong>600 000 Ft</strong></td><td>–</td></tr>
+</tbody>
+</table>
+<div class="callout"><strong>Skálázás:</strong> a legjobb ROAS-t hozó ad set-eket 20%/2-3 nap ütemben emeljük (learning védelme). Az őszi Black Week / Mikulás csúcsra a keret ideiglenesen megemelendő — a Purchase-kampányt skálázd, ne új gyenge traffic-kampányt indíts.</div>
+</div>
+
+<!-- 6 -->
+<div class="section">
+<h2>6. Célközönségek (audience mátrix)</h2>
+<table>
+<thead><tr><th>Szegmens</th><th>Piac / nyelv</th><th>Célzás (hideg)</th><th>Fő csomagok</th><th>Angle</th></tr></thead>
+<tbody>
+<tr><td>Párok / romantika</td><td>HU</td><td>25–55; érdeklődés: wellness, romantikus hétvége, évforduló; LAL vásárlók</td><td>Penthouse, Szerelmesek, Romantika és feltöltődés</td><td>privát jakuzzi, kettesben, „élmény mint ajándék”</td></tr>
+<tr><td>Családok / nyár</td><td>HU</td><td>30–50 szülők; érdeklődés: Balaton, családi nyaralás</td><td>Nyári családi apartman, Piknik a Balatonon</td><td>közvetlen strand, családbarát apartman</td></tr>
+<tr><td>Német turisták <span class="tag-new">capelt teszt</span></td><td>DE / AT (de)</td><td>30–60; Plattensee/Balaton, Ungarn Urlaub; <strong>Purchase objective</strong>, natív DE kreatív</td><td>Nyári apartman</td><td>„Direkt am Ufer”, eigener Strand, private Wellness</td></tr>
+<tr><td>Prémium / alkalom</td><td>HU</td><td>25–45; eljegyzés, évforduló, luxus</td><td>Lánykérés a Balatonon</td><td>Moët pezsgő, rózsacsokor, fedélzeti kamera</td></tr>
+<tr><td>Céges / csapatépítés</td><td>HU</td><td>25–55; csapatépítés, céges rendezvény</td><td>Business Escape (hajós)</td><td>hajó a Balaton közepén, csapatélmény</td></tr>
+</tbody>
+</table>
+<p class="muted"><small>Remarketing (minden szegmensre): videónézők, IG/FB engagerek, weboldal-látogatók (Pixel), csomag-oldal nézők, checkout-elhagyók, hírlevél-feltöltés (MailerLite → egyedi közönség). A DE-t Meta-n <strong>Purchase</strong>-objective-ként teszteljük, nem lead-formmal.</small></p>
+</div>
+
+<!-- 7 -->
+<div class="section">
+<h2>7. Csomag → ajánlat → angle mátrix</h2>
+<table>
+<thead><tr><th>Csomag</th><th>Ár (normál → akció)</th><th>Szegmens</th><th>Fő angle</th><th>Elsődleges CTA</th></tr></thead>
+<tbody>
+<tr><td>Penthouse lakosztály</td><td>255 300 → ~119 900 Ft</td><td>párok</td><td>saját panoráma jakuzzi, félpanzió, kettesben</td><td>Foglald le kettesben</td></tr>
+<tr><td>Szerelmesek csomagja</td><td>119 700 → 59 900 Ft</td><td>párok / ajándék</td><td>névre szóló ajándékutalvány – „az élmény mindig jó ajándék”</td><td>Ajándékozz élményt</td></tr>
+<tr><td>Romantika és feltöltődés</td><td>93 900 → 49 900 Ft</td><td>párok</td><td>jakuzzi + szauna + reggeli, feltöltődés</td><td>Töltődj fel a parton</td></tr>
+<tr><td>Nyári családi apartman</td><td>szezonális</td><td>családok / DE</td><td>közvetlen strand, családbarát apartman</td><td>Foglalj nyári helyet</td></tr>
+<tr><td>Piknik a Balatonon (hajós)</td><td>52 900 → 25 900 Ft (Deluxe)</td><td>párok / családok</td><td>hajós piknik, élmény a vízen</td><td>Szállj hajóra</td></tr>
+<tr><td>Lánykérés a Balatonon</td><td>299 900 → 99 900 Ft</td><td>prémium alkalom</td><td>Moët, rózsacsokor, fedélzeti kamera</td><td>Tedd fel a kérdést</td></tr>
+</tbody>
+</table>
+<p class="muted"><small>Megjegyzés: a Meta export kampány-szinten nem bontja csomagonként a ROAS-t (egy „Purchase - csomagok” gyűjtő-kampány). A csomag-szintű győztes azonosításához <strong>hirdetés-szintű bontás</strong> vagy csomag-külön ad set-ek kellenek — ez a következő mérési lépés (12. pont).</small></p>
+</div>
+
+<!-- 8 -->
+<div class="section">
+<h2>8. Kreatív koncepció &amp; konvenciók</h2>
+<h3>A bevált „szokásos” ár-blokk (kötelező elemek)</h3>
+<ul>
+  <li>Áthúzott normál ár <strong>piros</strong> áthúzással + nagy akciós ár + a megtakarítás <strong>forintosítva</strong>.</li>
+  <li>Kedvezmény háromféleképp: forintosított · százalékos · <code>/fő/éj</code> bontás.</li>
+  <li>Sürgetés: <strong>Csak Ma ár</strong>, <strong>UTOLSÓ NAP!</strong>, érvényességi dátum kiemelve, limitált darabszám.</li>
+  <li>Kuponkód ékezet nélkül, nagybetűvel (pl. <code>NYAR2026</code>).</li>
+  <li>Formátum-mix témánként: 1 statikus + 1 AI mozgó videó + 1 beszélős AI videó.</li>
+</ul>
+<h3>Példa ad copy — Penthouse / párok (BOF, ár + sürgetés)</h3>
+<div class="adcopy"><span class="hl">Headline:</span> Penthouse privát jakuzzival – most 119 900 Ft (helyette 255 300 Ft)<br>
+<span class="hl">Primary:</span> Kettesben a Balaton felett, saját panoráma jakuzzival és félpanzióval. Spórolj 135 400 Ft-ot – az ajánlat limitált ideig él. Foglald le a romantikus szökést most!<br>
+<span class="hl">CTA:</span> Foglald le kettesben</div>
+<h3>Példa ad copy — Nyári apartman (DE, Purchase-teszt)</h3>
+<div class="adcopy"><span class="hl">Headline:</span> Direkt am Ufer des Balaton – Urlaub mit eigenem Strand<br>
+<span class="hl">Primary:</span> Erwache mit dem Klang der Wellen, frühstücke am Wasser, während die Kinder am eigenen Strand spielen. Das Royal Mediterran Aparthotel erwartet dich direkt am Balaton. Buche jetzt deinen Sommerplatz!<br>
+<span class="hl">CTA:</span> Jetzt buchen</div>
+<p class="muted"><small>Feed 1:1 (1080×1080) · Story/Reels 9:16 (1080×1920) · ad set-enként min. 3 kreatív-variáns. Bevált vizuálok újrahasznosítása évről évre, csak ár/dátum frissül.</small></p>
+</div>
+
+<!-- 9 -->
+<div class="section">
+<h2>9. Ütemezés – 2026 H2 szezonális naptár</h2>
+<table>
+<thead><tr><th>Időszak</th><th>Fókusz</th><th>Csomagok</th><th>Kampány-hangsúly</th></tr></thead>
+<tbody>
+<tr><td>Júl–Aug (most)</td><td>Nyári csúcs</td><td>Családi apartman, Piknik, hajós élmények</td><td>RM-CORE Purchase + TOF feltöltés HU; DE Purchase-teszt</td></tr>
+<tr><td>Szeptember</td><td>Ősz / céges</td><td>Páros wellness, Business Escape</td><td>páros + céges felfutás, RM feltöltés BW-re</td></tr>
+<tr><td>Október</td><td>Őszi romantika</td><td>Romantika és feltöltődés, Penthouse</td><td>evergreen páros, közönség-melegítés</td></tr>
+<tr><td>November</td><td><strong>Black Week</strong> (11.07–17) + Black Weekend (11.27–30)</td><td>összes páros + Deluxe</td><td>legerősebb akciók; a Purchase-kampányt skálázd, bevált tavalyi vizuál</td></tr>
+<tr><td>December</td><td><strong>Mikulás</strong> (12.05–06) + Karácsony (12.19–24) + Last minute</td><td>Penthouse, Szerelmesek, Karácsony családi, Last minute</td><td>kupon (MIKULAS-típus), ajándékutalvány, sürgetés; dec 24–27 készletet előre foglalni</td></tr>
+</tbody>
+</table>
+</div>
+
+<!-- 10 -->
+<div class="section">
+<h2>10. Mérés, tracking &amp; a mért hibák javítása <span class="tag-new">ÚJ</span></h2>
+<ul>
+  <li><strong>Purchase-re optimalizálj, ne AddToCart-ra.</strong> A mért adatban a cart-optimalizált kampányok 2,66 M Ft-ot költöttek 0 vásárlásért — az esemény-jel nem fordult át foglalássá.</li>
+  <li><strong>Esemény-térkép javítás:</strong> a „Sabeeapp Conversion” rossz eseményre (<code>donate_website</code>) optimalizált → 88 k Ft / 1 konverzió. A CAPI esemény-mappinget rendbe kell tenni: ViewContent → InitiateCheckout → <strong>Purchase (value + currency HUF)</strong>.</li>
+  <li><strong>Meta Pixel + Conversions API (CAPI):</strong> szerver-oldali események a pontos foglalás-mérésért (iOS/cookie-veszteség ellen).</li>
+  <li><strong>Valóság-ellenőrzés:</strong> a Meta ROAS-t <strong>havonta</strong> vetjük össze a <strong>SabeeApp</strong> (PMS) tényleges foglalással és a Looker Studio riporttal — a mért ROAS Meta-riportált, korábban volt eltérés-gyanú.</li>
+  <li><strong>UTM-ök</strong> minden hirdetésre a GA4 + Looker attribúcióhoz; <strong>heti „Levi csekk”</strong> (CTR, frequency &lt; 2,5, ROAS ad set szinten).</li>
+</ul>
+</div>
+
+<!-- 11 -->
+<div class="section">
+<h2>11. Tesztelési roadmap (A/B)</h2>
+<table>
+<thead><tr><th>Prioritás</th><th>Teszt</th><th>Variánsok</th><th>Mit tanulunk</th></tr></thead>
+<tbody>
+<tr><td>1</td><td><strong>Csomag-szintű ROAS</strong></td><td>csomag-külön ad set-ek / hirdetés-szintű bontás</td><td>melyik csomag hozza a foglalást (a gyűjtő-kampány nem bontja)</td></tr>
+<tr><td>2</td><td>Angle</td><td>romantika/jakuzzi vs. ár/kedvezmény vs. ajándék</td><td>melyik hook konvertál csomagonként</td></tr>
+<tr><td>3</td><td>Kreatív forma</td><td>statikus ár-blokk vs. AI mozgó vs. beszélős AI videó</td><td>legjobb formátum szegmensenként</td></tr>
+<tr><td>4</td><td><strong>DE Purchase-teszt</strong></td><td>DE Purchase objective vs. korábbi (bukott) DE Lead</td><td>megtérül-e a DE Purchase-objective-ként</td></tr>
+<tr><td>5</td><td>Kedvezmény-kijelzés</td><td>forintosított vs. %-os vs. /fő/éj</td><td>legerősebb ár-kommunikáció</td></tr>
+</tbody>
+</table>
+</div>
+
+<!-- 12 -->
+<div class="section">
+<h2>12. Kockázatok &amp; mitigáció</h2>
+<table>
+<thead><tr><th>Kockázat</th><th>Hatás</th><th>Mitigáció</th></tr></thead>
+<tbody>
+<tr><td>Rossz eseményre optimalizálás (AddToCart / donate)</td><td>költés foglalás nélkül (mért!)</td><td>Purchase esemény + CAPI mapping ellenőrzés indítás előtt</td></tr>
+<tr><td>Készlethiány csúcsidőben (dec 24–27)</td><td>elköltött budget foglalás nélkül</td><td>SabeeApp kapacitás-egyeztetés indítás előtt</td></tr>
+<tr><td>DE keret elfolyás</td><td>nem térülő költés (mért: 161 k Ft/lead)</td><td>capelt DE Purchase-teszt, CPA-küszöbre kilövés</td></tr>
+<tr><td>Hajóbérlés/bár hígítja a szálloda ROAS-t</td><td>félrevezető riport</td><td>külön kampány + külön riport-nézet</td></tr>
+<tr><td>Mérési eltérés (Meta vs. valóság)</td><td>rossz ROAS-döntés</td><td>CAPI + havi PMS-összevetés</td></tr>
+<tr><td>Kreatív-kifáradás</td><td>növekvő CPA</td><td>frequency &lt; 2,5, 2-3 hetente friss kreatív</td></tr>
+</tbody>
+</table>
+</div>
+
+<!-- 13 -->
+<div class="section">
+<h2>13. Következő lépések (checklist)</h2>
+<ul>
+  <li>☐ Purchase esemény + CAPI mapping ellenőrzés (ViewContent / InitiateCheckout / <strong>Purchase + value</strong>).</li>
+  <li>☐ AddToCart-optimalizált és DE-lead kampányok kivezetése; a keret átcsoportosítása RM-CORE Purchase-re.</li>
+  <li>☐ Egyedi közönségek: videónézők, oldal-látogatók, csomag-oldal nézők, checkout-elhagyók, hírlevél-lista (MailerLite), LAL vásárlók.</li>
+  <li>☐ RM-CORE Purchase + RM-BOF élesítése elsőként; csomag-szintű ad set-ek a ROAS-bontáshoz.</li>
+  <li>☐ DE Purchase-teszt capelt kerettel; CPA-küszöb és kilövési szabály beállítása.</li>
+  <li>☐ Hajóbérlés/bár kampányok szeparálása + külön riport-nézet.</li>
+  <li>☐ Heti optimalizálási ritmus + havi Looker/SabeeApp ROAS-reconciliáció.</li>
+</ul>
+</div>
+
+<div class="foot">
+Royal Mediterran Aparthotel · Meta Ads Kampányterv <strong>v1.1</strong> · Hypin' · 2026.07.17 · Adatalap: Sparadise Kft. Meta-fiók export (2023.06.17–2026.07.16 + elmúlt 30 nap). A ROAS/CPA értékek Meta-riportáltak, havi SabeeApp (PMS) reconciliációval érvényesítendők. Csak szabad kapacitásra hirdetünk.
+</div>
+
+</body>
+</html>
