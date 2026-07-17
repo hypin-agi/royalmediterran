@@ -54,6 +54,65 @@ A többi tanulság a briefek mintázatából levont következtetés. Ahol nincs 
 - **Költés-koncentráció tanulság:** a fiók történelmileg a nyerőre (Purchase-csomagok) tette a
   keret zömét — ezt folytatni kell, nem szétaprózni gyenge traffic/cart kampányokra.
 
+## ⭐⭐ HIRDETÉS-SZINTŰ (ad-level) elemzés — 2026-07-17-i export (241 hirdetés)
+
+> Forrás: `raw/ads/meta/2026-07-17-meta-hirdetes-szintu-2023-2026.csv` (Sparadise Kft.,
+> 2023.06.17–2026.07.17, 241 hirdetés, ebből 175 költött). Ez a legrészletesebb adat:
+> hirdetésenkénti költés/vásárlás/ROAS + hirdetéssorozat + minőségi rangsor.
+> Össz mért költés 6,70 M Ft, 285 vásárlás; a **Purchase-objektívű** hirdetések adják a
+> **285-ből 240 vásárlást** (~84%). Költés-súlyozott átlag ROAS a mérhető hirdetéseken: **4,61**.
+
+**A single legnagyobb nyerő hirdetés:**
+- **`2026_01 - 99e - kép`** (Deluxe lakosztály 99.900 Ft, **statikus KÉP**): **722.526 Ft** költés,
+  **55 vásárlás**, CPA **13.137 Ft**, **ROAS 7,91**. Egyetlen statikus ár-blokk kép — a fiók
+  legnagyobb és egyik legjövedelmezőbb hirdetése. → A "99e Deluxe + statikus kép" bevált nyerő.
+
+**Formátum-tanulság (KORREKCIÓ a formátum-mix hipotézishez):**
+- **Statikus KÉP: súlyozott ROAS 4,50** (1,42 M Ft költés) ≫ **videó: 1,91** (705 e Ft) ≈ **AI videó: 2,23** (153 e Ft).
+- → A **statikus ár-blokk kép viszi a konverziót**, a videó (sima és AI is) alulteljesít vásárlásra.
+  A brain korábbi "1 statikus + 1 AI mozgó + 1 beszélős videó" mixe finomítandó: a videó
+  awareness/feltöltés, a **konverziós budgetet statikus ár-blokk képre** kell tenni.
+
+**Angle / csomag ROAS-rangsor (hirdetésnév alapján, költés-súlyozott):**
+| Angle/csomag | db | költés | súly. ROAS |
+|---|---|---|---|
+| Privát strand | 1 | 31 e | **8,59** |
+| **Penthouse** | 10 | 351 e | **8,28** |
+| **Deluxe** | 7 | 254 e | **7,35** |
+| **Last Minute** | 9 | 262 e | **7,03** |
+| Nőnap | 1 | 51 e | 6,68 |
+| **Szerelmesek** | 25 | **1,08 M** | **6,08** (legnagyobb volumen) |
+| Valentin | 8 | 133 e | 5,00 |
+| Romantika/feltöltődés | 9 | 549 e | 3,62 |
+| Piknik/hajós | 3 | 293 e | 2,98 |
+| Hajóbérlés | 8 | 488 e | 2,01 |
+| Karácsony/családi | 8 | 99 e | **1,47** (gyenge) |
+
+→ **Párok/romantika a pénz**: Penthouse, Deluxe, Last Minute, Szerelmesek mind 6–8 ROAS.
+A **családi/karácsonyi** angle (1,47) és a **hajóbérlés** (2,01) gyenge — a hajó külön
+Sparadise termékvonal, a családi hotel-angle Meta-n nem hoz vásárlást.
+
+**Szezonalitás (ad-level megerősítés):** a **decemberi páros/penthouse/last minute** hirdetések
+a legjövedelmezőbbek (ROAS 8–13, CPA 4.500–11.000 Ft): pl. `2025_12 - karácsonyi szerelmesek`
+ROAS 12,95; `2025_12 - karácsonyi penthouse` 9,90–10,12; `2025_12 (lastminute 40e)` 8,81 (27 vásárlás).
+→ December a legjobb megtérülésű ablak — ide skálázni.
+
+**Bizonyított ár-pontok (a nyerő hirdetések nevéből):** Deluxe **99.900**; Szerelmesek **69.900**
+(illetve 70–80e "ajándék hajóval"); Last Minute **40e** (és 10e/fő/éj kommunikáció);
+Romantika **55e**; Valentin **59.900**; Penthouse mikulás **25e/fő**.
+
+**Elpazarolt költés (ad-level, kerülendő):**
+- **`2025_alwayson_kép_v2`** always-on boost: **584.339 Ft** költés → **2 vásárlás, ROAS 0,07**. A legnagyobb pénznyelő.
+- Összesen **~1,82 M Ft** ment el 0-vásárlásos hirdetésekre (>30 e Ft/db) — jellemzően
+  link_click / landing_page_view / video_thruplay / **add_to_cart** objektívvel
+  (pl. `2026_04 - szerelmesek + hajo 80e` add_to_cart-on 57.840 Ft → 0 vásárlás),
+  és a `donate_website` eseményre optimalizált `15szazalek` (65.975 Ft → 0).
+- Objektív-bontás: link_click 47 hirdetés / 1,56 M Ft / **mindössze 16 vásárlás**;
+  add_to_cart 9 hirdetés / 292 e Ft / **4 vásárlás**. → Ezekre NE menjen konverziós budget.
+
+**Minőségi rangsor:** a legtöbb hirdetésnél üres ("–"), a besoroltak közül 18 "Átlagos",
+csak 4 "Átlag feletti" — a kreatív-minőség jelzés gyenge, a nyerőket az ár/angle/objektív viszi, nem a Meta minőség-score.
+
 
 ## Mit tudunk (bevált mintázatok a kampány-történetből)
 - A **romantika / privát jakuzzi** angle a párok fő húzóüzenete (Penthouse, Szerelmesek).
