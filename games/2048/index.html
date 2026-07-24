@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>2048 — Választható rács</title>
+<style>
+  :root {
+    --bg: #faf8ef;
+    --board: #bbada0;
+    --cell: #cdc1b4;
+    --text-dark: #776e65;
+    --text-light: #f9f6f2;
+    --btn: #8f7a66;
+    --gap: 10px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    height: 100%;
+    background: var(--bg);
+    font-family: "Helvetica Neue", Arial, sans-serif;
+    color: var(--text-dark);
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100%;
+  }
+
+  .wrap {
+    width: 100%;
+    max-width: 500px;
+    padding: 16px;
+    flex: 1 0 auto;
+  }
+
+  /* ---- Fejléc ---- */
+  header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+  .logo {
+    background: #edc22e;
+    color: #fff;
+    font-weight: 700;
+    font-size: 40px;
+    border-radius: 6px;
+    padding: 14px 18px;
+    line-height: 1;
+  }
+  .scores { display: flex; gap: 8px; }
+  .score-box {
+    background: var(--board);
+    color: var(--text-light);
+    border-radius: 6px;
+    padding: 8px 14px;
+    text-align: center;
+    min-width: 84px;
+  }
+  .score-box .label {
+    font-size: 12px;
+    letter-spacing: 1px;
+    color: #eee4da;
+    text-transform: uppercase;
+  }
+  .score-box .value { font-size: 22px; font-weight: 700; }
+
+  /* ---- Vezérlők ---- */
+  .controls {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+  }
+  .size-picker { display: flex; gap: 6px; }
+  .size-btn {
+    background: var(--cell);
+    color: var(--text-dark);
+    border: none;
+    border-radius: 6px;
+    padding: 8px 12px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background .15s;
+  }
+  .size-btn.active { background: var(--btn); color: var(--text-light); }
+  .new-game {
+    background: var(--btn);
+    color: var(--text-light);
+    border: none;
+    border-radius: 6px;
+    padding: 8px 16px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .subtitle { font-size: 14px; color: var(--text-dark); margin-bottom: 12px; }
+  .subtitle b { color: #776e65; }
+
+  /* ---- Tábla ---- */
+  .board-outer { position: relative; }
+  .board {
+    position: relative;
+    background: var(--board);
+    border-radius: 8px;
+    padding: var(--gap);
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    touch-action: none;
+  }
+  .grid-bg {
+    position: absolute;
+    inset: var(--gap);
+    display: grid;
+    gap: var(--gap);
+  }
+  .grid-cell { background: var(--cell); border-radius: 6px; }
+
+  .tiles { position: absolute; inset: var(--gap); }
+  .tile {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    font-weight: 700;
+    background: #eee4da;
+    color: var(--text-dark);
+    transition: transform .12s ease, opacity .12s ease;
+    will-change: transform;
+  }
+  .tile.pop { animation: pop .15s ease; }
+  @keyframes pop {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.12); }
+    100% { transform: scale(1); }
+  }
+  .tile.new { animation: appear .15s ease; }
+  @keyframes appear {
+    0% { opacity: 0; transform: scale(0.4); }
+    100% { opacity: 1; transform: scale(1); }
+  }
+
+  /* Egyszerű, nem zavaró színskála — homokszínből meleg felé */
+  .v2    { background:#eee4da; color:#776e65; }
+  .v4    { background:#ede0c8; color:#776e65; }
+  .v8    { background:#f2d0a4; color:#776e65; }
+  .v16   { background:#f5c088; color:#776e65; }
+  .v32   { background:#f3aa6d; color:#fff; }
+  .v64   { background:#ee8f5a; color:#fff; }
+  .v128  { background:#edcf72; color:#fff; }
+  .v256  { background:#edcc61; color:#fff; }
+  .v512  { background:#edc850; color:#fff; }
+  .v1024 { background:#edc53f; color:#fff; }
+  .v2048 { background:#edc22e; color:#fff; }
+  .vhigh { background:#3c3a32; color:#fff; }
+
+  /* ---- Game over ---- */
+  .overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(250,248,239,.78);
+    border-radius: 8px;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    z-index: 5;
+  }
+  .overlay.show { display: flex; }
+  .overlay h2 { font-size: 30px; color: var(--text-dark); }
+
+  /* ---- Reklámhely alul ---- */
+  .ad-slot {
+    flex-shrink: 0;
+    width: 100%;
+    max-width: 500px;
+    height: 90px;
+    margin: 10px auto 8px;
+    background: #f0ede4;
+    border: 1px dashed #cdc1b4;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #b8ab9c;
+    font-size: 13px;
+    letter-spacing: 1px;
+  }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="logo">2048</div>
+      <div class="scores">
+        <div class="score-box">
+          <div class="label">Pont</div>
+          <div class="value" id="score">0</div>
+        </div>
+        <div class="score-box">
+          <div class="label">Legjobb</div>
+          <div class="value" id="best">0</div>
+        </div>
+      </div>
+    </header>
+
+    <div class="controls">
+      <div class="size-picker" id="sizePicker">
+        <button class="size-btn" data-size="3">3×3</button>
+        <button class="size-btn" data-size="4">4×4</button>
+        <button class="size-btn" data-size="5">5×5</button>
+        <button class="size-btn" data-size="6">6×6</button>
+      </div>
+      <button class="new-game" id="newGame">Új játék</button>
+    </div>
+
+    <div class="subtitle">Húzd össze az azonos csempéket a <b>2048</b>-ig!</div>
+
+    <div class="board-outer">
+      <div class="board" id="board">
+        <div class="grid-bg" id="gridBg"></div>
+        <div class="tiles" id="tiles"></div>
+        <div class="overlay" id="overlay">
+          <h2 id="overlayText">Vége!</h2>
+          <button class="new-game" id="overlayBtn">Újra</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Reklámhely -->
+  <div class="ad-slot">REKLÁM</div>
+
+<script>
+(function () {
+  "use strict";
+
+  var board = document.getElementById("board");
+  var gridBg = document.getElementById("gridBg");
+  var tilesEl = document.getElementById("tiles");
+  var scoreEl = document.getElementById("score");
+  var bestEl = document.getElementById("best");
+  var overlay = document.getElementById("overlay");
+  var overlayText = document.getElementById("overlayText");
+  var GAP = 10;
+
+  var size = parseInt(localStorage.getItem("g2048_size") || "4", 10);
+  var grid = [];       // size×size, cellák értékei (0 = üres)
+  var score = 0;
+  var best = {};
+  try { best = JSON.parse(localStorage.getItem("g2048_best") || "{}"); } catch (e) { best = {}; }
+  var idSeq = 1;
+  var tileMap = {};    // id -> DOM elem
+  var busy = false;
+
+  /* ---------- Segédek ---------- */
+  function emptyGrid(n) {
+    var g = [];
+    for (var r = 0; r < n; r++) { g.push(new Array(n).fill(null)); }
+    return g;
+  }
+
+  function forEachCell(fn) {
+    for (var r = 0; r < size; r++)
+      for (var c = 0; c < size; c++)
+        fn(r, c);
+  }
+
+  function cellSizePx() {
+    var inner = board.clientWidth - GAP * 2;
+    return (inner - GAP * (size - 1)) / size;
+  }
+
+  function fontFor(value) {
+    var cs = cellSizePx();
+    var digits = String(value).length;
+    var base = cs * 0.42;
+    if (digits >= 4) base = cs * 0.30;
+    else if (digits === 3) base = cs * 0.36;
+    return Math.max(12, Math.round(base)) + "px";
+  }
+
+  function valueClass(v) {
+    if (v <= 2048) return "v" + v;
+    return "vhigh";
+  }
+
+  /* ---------- Rács kirajzolás ---------- */
+  function buildGridBg() {
+    gridBg.style.gridTemplateColumns = "repeat(" + size + ", 1fr)";
+    gridBg.style.gridTemplateRows = "repeat(" + size + ", 1fr)";
+    gridBg.innerHTML = "";
+    for (var i = 0; i < size * size; i++) {
+      var d = document.createElement("div");
+      d.className = "grid-cell";
+      gridBg.appendChild(d);
+    }
+  }
+
+  function positionTile(el, r, c) {
+    var cs = cellSizePx();
+    var x = c * (cs + GAP);
+    var y = r * (cs + GAP);
+    el.style.width = cs + "px";
+    el.style.height = cs + "px";
+    el.style.transform = "translate(" + x + "px," + y + "px)";
+    el.style.fontSize = fontFor(el._value);
+  }
+
+  function createTileEl(tile) {
+    var el = document.createElement("div");
+    el.className = "tile " + valueClass(tile.value) + " new";
+    el._value = tile.value;
+    el.textContent = tile.value;
+    positionTile(el, tile.r, tile.c);
+    tilesEl.appendChild(el);
+    tileMap[tile.id] = el;
+  }
+
+  function updateTileEl(tile, pop) {
+    var el = tileMap[tile.id];
+    if (!el) return;
+    el._value = tile.value;
+    el.textContent = tile.value;
+    el.className = "tile " + valueClass(tile.value) + (pop ? " pop" : "");
+    positionTile(el, tile.r, tile.c);
+  }
+
+  function renderAll() {
+    tilesEl.innerHTML = "";
+    tileMap = {};
+    forEachCell(function (r, c) {
+      var t = grid[r][c];
+      if (t) createTileEl(t);
+    });
+  }
+
+  function relayout() {
+    forEachCell(function (r, c) {
+      var t = grid[r][c];
+      if (t && tileMap[t.id]) positionTile(tileMap[t.id], r, c);
+    });
+  }
+
+  /* ---------- Játéklogika ---------- */
+  function spawn() {
+    var empties = [];
+    forEachCell(function (r, c) { if (!grid[r][c]) empties.push([r, c]); });
+    if (!empties.length) return null;
+    var pos = empties[Math.floor(Math.random() * empties.length)];
+    var value = Math.random() < 0.9 ? 2 : 4;
+    var tile = { id: idSeq++, r: pos[0], c: pos[1], value: value };
+    grid[pos[0]][pos[1]] = tile;
+    createTileEl(tile);
+    return tile;
+  }
+
+  // Egy sor/oszlop értéklistából csúsztat balra, összeolvaszt.
+  // Visszaadja a cél-tömböt (tile-okkal), és jelzi, változott-e.
+  function slideLine(line) {
+    // line: tile vagy null tömb, hossz = size
+    var tiles = line.filter(Boolean);
+    var result = [];
+    var moved = false;
+    var gained = 0;
+    for (var i = 0; i < tiles.length; i++) {
+      if (i + 1 < tiles.length && tiles[i].value === tiles[i + 1].value) {
+        // összeolvad
+        var merged = tiles[i];
+        merged.value *= 2;
+        merged._merged = true;
+        merged._absorb = tiles[i + 1]; // eltűnő csempe
+        gained += merged.value;
+        result.push(merged);
+        i++;
+        moved = true;
+      } else {
+        result.push(tiles[i]);
+      }
+    }
+    // padding null-lal
+    while (result.length < size) result.push(null);
+    // változás detektálás pozíció szerint
+    for (var j = 0; j < size; j++) {
+      var before = line[j];
+      var after = result[j];
+      if ((before && !after) || (!before && after) ||
+          (before && after && before.id !== after.id) ||
+          (after && after._merged)) {
+        moved = true;
+      }
+    }
+    return { line: result, moved: moved, gained: gained };
+  }
+
+  function getLine(dir, index) {
+    // dir: 'L','R','U','D'; visszaad size hosszú tömböt a mozgás irányában rendezve
+    var line = [];
+    for (var i = 0; i < size; i++) {
+      var r, c;
+      if (dir === "L") { r = index; c = i; }
+      else if (dir === "R") { r = index; c = size - 1 - i; }
+      else if (dir === "U") { r = i; c = index; }
+      else { r = size - 1 - i; c = index; }
+      line.push(grid[r][c]);
+    }
+    return line;
+  }
+
+  function setLine(dir, index, line) {
+    for (var i = 0; i < size; i++) {
+      var r, c;
+      if (dir === "L") { r = index; c = i; }
+      else if (dir === "R") { r = index; c = size - 1 - i; }
+      else if (dir === "U") { r = i; c = index; }
+      else { r = size - 1 - i; c = index; }
+      grid[r][c] = line[i];
+      if (line[i]) { line[i].r = r; line[i].c = c; }
+    }
+  }
+
+  function move(dir) {
+    if (busy) return;
+    var anyMoved = false;
+    var totalGain = 0;
+    var absorbed = [];
+
+    for (var index = 0; index < size; index++) {
+      var line = getLine(dir, index);
+      var res = slideLine(line);
+      if (res.moved) anyMoved = true;
+      totalGain += res.gained;
+      for (var k = 0; k < res.line.length; k++) {
+        var t = res.line[k];
+        if (t && t._absorb) { absorbed.push(t._absorb); }
+      }
+      setLine(dir, index, res.line);
+    }
+
+    if (!anyMoved) return;
+
+    score += totalGain;
+    scoreEl.textContent = score;
+
+    // animáljuk a mozgó csempéket új pozíciójukba
+    forEachCell(function (r, c) {
+      var t = grid[r][c];
+      if (t && tileMap[t.id]) positionTile(tileMap[t.id], r, c);
+    });
+
+    busy = true;
+    setTimeout(function () {
+      // eltűnő (beolvadt) csempék törlése + pop
+      absorbed.forEach(function (t) {
+        var el = tileMap[t.id];
+        if (el) { el.remove(); delete tileMap[t.id]; }
+      });
+      forEachCell(function (r, c) {
+        var t = grid[r][c];
+        if (t && t._merged) {
+          updateTileEl(t, true);
+          t._merged = false;
+          t._absorb = null;
+        }
+      });
+
+      spawn();
+      saveBest();
+      busy = false;
+
+      if (isGameOver()) showOverlay("Vége!");
+      else if (hasWon()) showOverlay("Nyertél! 🎉");
+    }, 120);
+  }
+
+  function hasWon() {
+    if (grid._won) return false;
+    var won = false;
+    forEachCell(function (r, c) {
+      if (grid[r][c] && grid[r][c].value >= 2048) won = true;
+    });
+    if (won) grid._won = true;
+    return won;
+  }
+
+  function isGameOver() {
+    var full = true;
+    forEachCell(function (r, c) { if (!grid[r][c]) full = false; });
+    if (!full) return false;
+    // van-e szomszédos egyforma
+    for (var r = 0; r < size; r++) {
+      for (var c = 0; c < size; c++) {
+        var v = grid[r][c].value;
+        if (c + 1 < size && grid[r][c + 1].value === v) return false;
+        if (r + 1 < size && grid[r + 1][c].value === v) return false;
+      }
+    }
+    return true;
+  }
+
+  function showOverlay(text) {
+    overlayText.textContent = text;
+    overlay.classList.add("show");
+  }
+  function hideOverlay() { overlay.classList.remove("show"); }
+
+  /* ---------- Pontszám mentés ---------- */
+  function saveBest() {
+    var key = String(size);
+    if (!best[key] || score > best[key]) {
+      best[key] = score;
+      localStorage.setItem("g2048_best", JSON.stringify(best));
+    }
+    bestEl.textContent = best[key] || 0;
+  }
+
+  /* ---------- Új játék ---------- */
+  function newGame() {
+    hideOverlay();
+    score = 0;
+    scoreEl.textContent = 0;
+    grid = emptyGrid(size);
+    grid._won = false;
+    tilesEl.innerHTML = "";
+    tileMap = {};
+    buildGridBg();
+    bestEl.textContent = best[String(size)] || 0;
+    spawn();
+    spawn();
+  }
+
+  function setSize(n) {
+    size = n;
+    localStorage.setItem("g2048_size", String(n));
+    markActiveSize();
+    newGame();
+  }
+
+  function markActiveSize() {
+    var btns = document.querySelectorAll(".size-btn");
+    btns.forEach(function (b) {
+      b.classList.toggle("active", parseInt(b.dataset.size, 10) === size);
+    });
+  }
+
+  /* ---------- Bemenet ---------- */
+  document.addEventListener("keydown", function (e) {
+    var map = { ArrowLeft: "L", ArrowRight: "R", ArrowUp: "U", ArrowDown: "D",
+                a: "L", d: "R", w: "U", s: "D" };
+    var dir = map[e.key];
+    if (dir) { e.preventDefault(); move(dir); }
+  });
+
+  // Érintés / swipe
+  var touchStart = null;
+  board.addEventListener("touchstart", function (e) {
+    var t = e.changedTouches[0];
+    touchStart = { x: t.clientX, y: t.clientY };
+  }, { passive: true });
+  board.addEventListener("touchend", function (e) {
+    if (!touchStart) return;
+    var t = e.changedTouches[0];
+    var dx = t.clientX - touchStart.x;
+    var dy = t.clientY - touchStart.y;
+    var absX = Math.abs(dx), absY = Math.abs(dy);
+    if (Math.max(absX, absY) < 24) { touchStart = null; return; }
+    if (absX > absY) move(dx > 0 ? "R" : "L");
+    else move(dy > 0 ? "D" : "U");
+    touchStart = null;
+  }, { passive: true });
+
+  document.getElementById("sizePicker").addEventListener("click", function (e) {
+    var btn = e.target.closest(".size-btn");
+    if (btn) setSize(parseInt(btn.dataset.size, 10));
+  });
+  document.getElementById("newGame").addEventListener("click", newGame);
+  document.getElementById("overlayBtn").addEventListener("click", newGame);
+
+  window.addEventListener("resize", relayout);
+
+  /* ---------- Indítás ---------- */
+  markActiveSize();
+  newGame();
+})();
+</script>
+</body>
+</html>
