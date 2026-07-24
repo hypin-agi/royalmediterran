@@ -35,18 +35,21 @@ tervezést és stratégiai gondolkodást gyakorolsz.
 - **Figyelem és munkamemória:** a tábla állapotának fejben tartása lépések között.
 
 ## 4. Évfolyam szerinti nehézségi skálázás (a meglévő funkciókkal)
-A játék rácsmérete és célszáma állítható, így egyetlen játék több korosztályt is kiszolgál:
+A játék rácsmérete és célszáma állítható. A skálázás **kumulatív**: minden magasabb
+évfolyamon elérhető marad az összes kisebb pálya is, és felfelé bővül egy újabb mérettel.
+Így a gyerek szabadon választhat a már ismert, könnyebb pályák és az új kihívás között.
 
-| Szint | Évfolyam | Rács | Ajánlott cél-csempe | Fókusz |
-|------|----------|------|---------------------|--------|
-| Kezdő | **2. évf.** | **3×3** | 32 – 64 | kétszerezés, kis számok, sikerélmény |
-| Alap | 3–4. évf. | 4×4 | 128 – 512 | fejszámolás, tervezés |
-| Haladó | 5–6. évf. | 5×5 | 1024 | hosszabb stratégia |
-| Profi | 6. évf.+ | 6×6 | 2048+ | kitartás, optimalizálás |
+| Szint | Évfolyam | Elérhető rácsok | Új ezen a szinten | Ajánlott cél-csempe |
+|------|----------|-----------------|-------------------|---------------------|
+| Kezdő | **2. évf.** | **3×3, 4×4** | 3×3 és 4×4 | 32 – 128 |
+| Alap | 3–4. évf. | 3×3, 4×4, **5×5** | 5×5 | 128 – 512 |
+| Haladó | 5–6. évf. | 3×3, 4×4, 5×5, **6×6** | 6×6 | 1024 – 2048 |
 
-> Javaslat: 2. évfolyamon a **3×3-as pálya legyen az alapértelmezett**, és a cél egy
-> elérhető kis szám (pl. 64) — a klasszikus „2048" cél ne jelenjen meg alsóban, hogy
-> reális, motiváló legyen.
+> **Alapértelmezett és cél évfolyamonként:**
+> - 2. évfolyamon a **3×3 legyen az alapértelmezett**, és a cél egy elérhető kis szám
+>   (pl. 64) — a 4×4 már választható, de a klasszikus „2048" cél alsóban ne jelenjen meg.
+> - Feljebb az alapértelmezett pálya és a célszám lépcsőzetesen nő, de a kisebb pályák
+>   végig elérhetők maradnak (differenciálás, ismétlés, sikerélmény).
 
 ## 5. Miért jó ez a verzió oktatásra (a beépített funkciók)
 - **Visszavonás (undo):** hibázás után visszaléphet — kulcsfontosságú kisiskolásoknál,
