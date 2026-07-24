@@ -84,21 +84,12 @@
     margin-bottom: 12px;
     flex-wrap: wrap;
   }
-  .size-picker { display: flex; gap: 6px; }
-  .size-btn {
-    background: var(--cell);
-    color: var(--text-dark);
-    border: none;
-    border-radius: 6px;
-    padding: 8px 12px;
+  .board-info {
     font-size: 15px;
     font-weight: 700;
-    cursor: pointer;
-    transition: background .15s;
+    color: var(--text-dark);
   }
-  .size-btn.active { background: var(--btn); color: var(--text-light); }
-  .size-picker.locked .size-btn { opacity: .45; cursor: not-allowed; }
-  .size-picker.locked .size-btn.active { opacity: 1; }
+  .board-info span { color: #8f7a66; font-weight: 400; }
   .new-game {
     background: var(--btn);
     color: var(--text-light);
@@ -195,7 +186,34 @@
     z-index: 5;
   }
   .overlay.show { display: flex; }
-  .overlay h2 { font-size: 30px; color: var(--text-dark); }
+  .overlay h2 { font-size: 28px; color: var(--text-dark); }
+  .overlay .hint { font-size: 13px; color: #8f7a66; margin-top: -4px; }
+
+  .board-select {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    width: 82%;
+    max-width: 300px;
+  }
+  .board-opt {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    background: var(--cell);
+    color: var(--text-dark);
+    border: 2px solid transparent;
+    border-radius: 8px;
+    padding: 12px 8px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background .15s;
+  }
+  .board-opt:hover { background: #d7ccbf; }
+  .board-opt.current { border-color: var(--btn); }
+  .bo-size { font-size: 20px; font-weight: 700; }
+  .bo-rec { font-size: 12px; color: #8f7a66; }
 
   /* ---- Reklámhely alul ---- */
   .ad-slot {
@@ -233,12 +251,7 @@
     </header>
 
     <div class="controls">
-      <div class="size-picker" id="sizePicker">
-        <button class="size-btn" data-size="3">3×3</button>
-        <button class="size-btn" data-size="4">4×4</button>
-        <button class="size-btn" data-size="5">5×5</button>
-        <button class="size-btn" data-size="6">6×6</button>
-      </div>
+      <div class="board-info" id="boardInfo">4×4</div>
       <button class="new-game" id="newGame">Új játék</button>
     </div>
 
@@ -249,8 +262,10 @@
         <div class="grid-bg" id="gridBg"></div>
         <div class="tiles" id="tiles"></div>
         <div class="overlay" id="overlay">
-          <h2 id="overlayText">Vége!</h2>
-          <button class="new-game" id="overlayBtn">Újra</button>
+          <h2 id="overlayText">Új játék</h2>
+          <div class="hint" id="overlayHint">Válaszd ki a pályát</div>
+          <div class="board-select" id="boardSelect"></div>
+          <button class="new-game" id="continueBtn" style="display:none">Vissza a játékhoz</button>
         </div>
       </div>
     </div>
@@ -270,7 +285,12 @@
   var bestEl = document.getElementById("best");
   var overlay = document.getElementById("overlay");
   var overlayText = document.getElementById("overlayText");
+  var overlayHint = document.getElementById("overlayHint");
+  var boardSelect = document.getElementById("boardSelect");
+  var boardInfo = document.getElementById("boardInfo");
+  var continueBtn = document.getElementById("continueBtn");
   var GAP = 10;
+  var SIZES = [3, 4, 5, 6];
 
   var size = parseInt(localStorage.getItem("g2048_size") || "4", 10);
   var grid = [];       // size×size, cellák értékei (0 = üres)
@@ -280,7 +300,6 @@
   var idSeq = 1;
   var tileMap = {};    // id -> DOM elem
   var busy = false;
-  var locked = false;  // igaz, ha már léptél — méret nem váltható
 
   /* ---------- Segédek ---------- */
   function emptyGrid(n) {
@@ -460,6 +479,7 @@
 
   function move(dir) {
     if (busy) return;
+    if (overlay.classList.contains("show")) return; // választó nyitva
     var anyMoved = false;
     var totalGain = 0;
     var absorbed = [];
@@ -477,9 +497,6 @@
     }
 
     if (!anyMoved) return;
-
-    // első érvényes lépés lezárja a méretválasztást
-    if (!locked) { locked = true; updatePickerState(); }
 
     score += totalGain;
     scoreEl.textContent = score;
@@ -513,8 +530,8 @@
       saveBest();
       busy = false;
 
-      if (isGameOver()) showOverlay("Vége!");
-      else if (hasWon()) showOverlay("Nyertél! 🎉");
+      if (isGameOver()) showSelect("Vége!", "Válassz pályát az újrakezdéshez", false);
+      else if (hasWon()) showSelect("Nyertél! 🎉", "Játssz tovább, vagy válts pályát", true);
     }, 100);
   }
 
@@ -543,11 +560,41 @@
     return true;
   }
 
-  function showOverlay(text) {
-    overlayText.textContent = text;
+  // Választóképernyő: pályaméretek + rekordok.
+  // canContinue = true esetén megjelenik a "Vissza a játékhoz" gomb.
+  function showSelect(title, hint, canContinue) {
+    overlayText.textContent = title;
+    overlayHint.textContent = hint || "";
+    renderBoardOptions();
+    continueBtn.style.display = canContinue ? "" : "none";
     overlay.classList.add("show");
   }
   function hideOverlay() { overlay.classList.remove("show"); }
+
+  function renderBoardOptions() {
+    boardSelect.innerHTML = "";
+    SIZES.forEach(function (n) {
+      var rec = best[String(n)] || 0;
+      var b = document.createElement("button");
+      b.className = "board-opt" + (n === size ? " current" : "");
+      var s = document.createElement("span");
+      s.className = "bo-size";
+      s.textContent = n + "×" + n;
+      var r = document.createElement("span");
+      r.className = "bo-rec";
+      r.textContent = "Rekord: " + (rec ? rec : "—");
+      b.appendChild(s);
+      b.appendChild(r);
+      b.addEventListener("click", function () { startWith(n); });
+      boardSelect.appendChild(b);
+    });
+  }
+
+  function startWith(n) {
+    size = n;
+    localStorage.setItem("g2048_size", String(n));
+    newGame();
+  }
 
   /* ---------- Pontszám mentés ---------- */
   function saveBest() {
@@ -569,33 +616,10 @@
     tilesEl.innerHTML = "";
     tileMap = {};
     buildGridBg();
+    boardInfo.textContent = size + "×" + size;
     bestEl.textContent = best[String(size)] || 0;
-    locked = false;          // új játékban újra választható a méret
-    updatePickerState();
     spawn();
     spawn();
-  }
-
-  function setSize(n) {
-    if (locked) return;      // játék közben nem váltható
-    size = n;
-    localStorage.setItem("g2048_size", String(n));
-    markActiveSize();
-    newGame();
-  }
-
-  function markActiveSize() {
-    var btns = document.querySelectorAll(".size-btn");
-    btns.forEach(function (b) {
-      b.classList.toggle("active", parseInt(b.dataset.size, 10) === size);
-    });
-  }
-
-  function updatePickerState() {
-    var picker = document.getElementById("sizePicker");
-    picker.classList.toggle("locked", locked);
-    var btns = picker.querySelectorAll(".size-btn");
-    btns.forEach(function (b) { b.disabled = locked; });
   }
 
   /* ---------- Bemenet ---------- */
@@ -624,17 +648,14 @@
     touchStart = null;
   }, { passive: true });
 
-  document.getElementById("sizePicker").addEventListener("click", function (e) {
-    var btn = e.target.closest(".size-btn");
-    if (btn) setSize(parseInt(btn.dataset.size, 10));
+  document.getElementById("newGame").addEventListener("click", function () {
+    showSelect("Új játék", "Válaszd ki a pályát", true);
   });
-  document.getElementById("newGame").addEventListener("click", newGame);
-  document.getElementById("overlayBtn").addEventListener("click", newGame);
+  continueBtn.addEventListener("click", hideOverlay);
 
   window.addEventListener("resize", relayout);
 
   /* ---------- Indítás ---------- */
-  markActiveSize();
   newGame();
 })();
 </script>
