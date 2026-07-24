@@ -133,8 +133,16 @@
   .grid-cell { background: var(--cell); border-radius: 6px; }
 
   .tiles { position: absolute; inset: var(--gap); }
+  /* Külső elem = pozíció (translate + transition), belső elem = megjelenés (scale).
+     Így a pop/appear scale-animáció nem írja felül a csúszó translate-et. */
   .tile {
     position: absolute;
+    transition: transform 100ms ease-in-out;
+    will-change: transform;
+  }
+  .tile-inner {
+    width: 100%;
+    height: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -142,19 +150,21 @@
     font-weight: 700;
     background: #eee4da;
     color: var(--text-dark);
-    transition: transform .12s ease, opacity .12s ease;
-    will-change: transform;
   }
-  .tile.pop { animation: pop .15s ease; }
+  .tile.pop .tile-inner { animation: pop 180ms ease; }
   @keyframes pop {
     0% { transform: scale(1); }
-    50% { transform: scale(1.12); }
+    50% { transform: scale(1.18); }
     100% { transform: scale(1); }
   }
-  .tile.new { animation: appear .15s ease; }
+  .tile.new .tile-inner { animation: appear 180ms ease; }
   @keyframes appear {
-    0% { opacity: 0; transform: scale(0.4); }
+    0% { opacity: 0; transform: scale(0); }
     100% { opacity: 1; transform: scale(1); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .tile { transition: none; }
+    .tile.pop .tile-inner, .tile.new .tile-inner { animation: none; }
   }
 
   /* Egyszerű, nem zavaró színskála — homokszínből meleg felé */
@@ -323,14 +333,18 @@
     el.style.width = cs + "px";
     el.style.height = cs + "px";
     el.style.transform = "translate(" + x + "px," + y + "px)";
-    el.style.fontSize = fontFor(el._value);
+    if (el._inner) el._inner.style.fontSize = fontFor(el._value);
   }
 
   function createTileEl(tile) {
     var el = document.createElement("div");
-    el.className = "tile " + valueClass(tile.value) + " new";
+    el.className = "tile new";
+    var inner = document.createElement("div");
+    inner.className = "tile-inner " + valueClass(tile.value);
+    inner.textContent = tile.value;
+    el._inner = inner;
     el._value = tile.value;
-    el.textContent = tile.value;
+    el.appendChild(inner);
     positionTile(el, tile.r, tile.c);
     tilesEl.appendChild(el);
     tileMap[tile.id] = el;
@@ -340,9 +354,15 @@
     var el = tileMap[tile.id];
     if (!el) return;
     el._value = tile.value;
-    el.textContent = tile.value;
-    el.className = "tile " + valueClass(tile.value) + (pop ? " pop" : "");
+    el._inner.textContent = tile.value;
+    el._inner.className = "tile-inner " + valueClass(tile.value);
+    el.classList.remove("new");
     positionTile(el, tile.r, tile.c);
+    if (pop) {
+      el.classList.remove("pop");
+      void el.offsetWidth; // reflow: újraindítja a pop animációt
+      el.classList.add("pop");
+    }
   }
 
   function renderAll() {
@@ -464,10 +484,13 @@
     score += totalGain;
     scoreEl.textContent = score;
 
-    // animáljuk a mozgó csempéket új pozíciójukba
+    // animáljuk a mozgó csempéket új pozíciójukba;
+    // az összeolvadó (eltűnő) csempe is odacsúszik a célcellába
     forEachCell(function (r, c) {
       var t = grid[r][c];
-      if (t && tileMap[t.id]) positionTile(tileMap[t.id], r, c);
+      if (!t) return;
+      if (tileMap[t.id]) positionTile(tileMap[t.id], r, c);
+      if (t._absorb && tileMap[t._absorb.id]) positionTile(tileMap[t._absorb.id], r, c);
     });
 
     busy = true;
@@ -492,7 +515,7 @@
 
       if (isGameOver()) showOverlay("Vége!");
       else if (hasWon()) showOverlay("Nyertél! 🎉");
-    }, 120);
+    }, 100);
   }
 
   function hasWon() {
