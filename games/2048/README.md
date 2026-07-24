@@ -8,6 +8,16 @@
   játék végén** jelenik meg (az „Új játék" gomb, ill. a „Vége" képernyő) — játék közben
   nem látszik, így nem lehet véletlenül nullázni.
 - **Rekordok a választóban:** minden pályaméret mellett ott a hozzá tartozó rekord.
+- **Visszavonás (Undo):** a ↶ gomb (vagy `U` / `Z` / `Backspace`) visszavonja a lépéseket
+  (max. 20). Vesztő lépés után is működik — kimenti a „Vége" helyzetből. A legtöbbet kért
+  és legdicsértebb funkció a hasonló játékok értékeléseiben.
+- **Automatikus mentés:** az aktuális állás (`g2048_state`) minden lépésnél mentődik, így
+  újratöltés / kilépés után ott folytatod, ahol abbahagytad. (Gyakori panasz volt máshol az
+  elveszett haladás.)
+- **Hang + rezgés:** finom hangjelzés és haptikus rezgés összeolvadáskor, a 🔊 gombbal
+  kikapcsolható (`g2048_sound`). WebAudio-alapú, nincs külső fájl.
+- **Nem tolakodó reklám:** egyetlen alsó banner, nincs kihagyhatatlan interstitial két meccs
+  között — ez volt a #1 negatívum a többi 2048-appnál.
 - **Sima animációk:** az eredeti 2048 mintájára a pozíció (`translate`) és a megjelenés
   (`scale`) külön elemen fut; az összeolvadó csempe is odacsúszik a célcellába.
 - **Egyszerű, nem zavaró színek:** homokszínből meleg felé haladó, visszafogott skála.

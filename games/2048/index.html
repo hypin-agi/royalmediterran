@@ -90,6 +90,24 @@
     color: var(--text-dark);
   }
   .board-info span { color: #8f7a66; font-weight: 400; }
+  .ctrl-btns { display: flex; align-items: center; gap: 8px; }
+  .icon-btn {
+    background: var(--cell);
+    color: var(--text-dark);
+    border: none;
+    border-radius: 6px;
+    width: 38px;
+    height: 38px;
+    font-size: 18px;
+    line-height: 1;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background .15s;
+  }
+  .icon-btn:hover { background: #d7ccbf; }
+  .icon-btn:disabled { opacity: .4; cursor: default; }
   .new-game {
     background: var(--btn);
     color: var(--text-light);
@@ -252,7 +270,11 @@
 
     <div class="controls">
       <div class="board-info" id="boardInfo">4×4</div>
-      <button class="new-game" id="newGame">Új játék</button>
+      <div class="ctrl-btns">
+        <button class="icon-btn" id="soundBtn" title="Hang be/ki" aria-label="Hang be/ki">🔊</button>
+        <button class="icon-btn" id="undoBtn" title="Visszavonás" aria-label="Visszavonás" disabled>↶</button>
+        <button class="new-game" id="newGame">Új játék</button>
+      </div>
     </div>
 
     <div class="subtitle">Húzd össze az azonos csempéket a <b>2048</b>-ig!</div>
@@ -289,17 +311,26 @@
   var boardSelect = document.getElementById("boardSelect");
   var boardInfo = document.getElementById("boardInfo");
   var continueBtn = document.getElementById("continueBtn");
+  var soundBtn = document.getElementById("soundBtn");
+  var undoBtn = document.getElementById("undoBtn");
   var GAP = 10;
   var SIZES = [3, 4, 5, 6];
+  var MAX_UNDO = 20;
 
-  var size = parseInt(localStorage.getItem("g2048_size") || "4", 10);
+  function lsGet(k, d) { try { var v = localStorage.getItem(k); return v == null ? d : v; } catch (e) { return d; } }
+  function lsSet(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+
+  var size = parseInt(lsGet("g2048_size", "4"), 10) || 4;
   var grid = [];       // size×size, cellák értékei (0 = üres)
   var score = 0;
   var best = {};
-  try { best = JSON.parse(localStorage.getItem("g2048_best") || "{}"); } catch (e) { best = {}; }
+  try { best = JSON.parse(lsGet("g2048_best", "{}")); } catch (e) { best = {}; }
   var idSeq = 1;
   var tileMap = {};    // id -> DOM elem
   var busy = false;
+  var history = [];    // undo verem (lépés előtti állapotok)
+  var soundOn = lsGet("g2048_sound", "1") !== "0";
+  var audioCtx = null;
 
   /* ---------- Segédek ---------- */
   function emptyGrid(n) {
@@ -355,9 +386,9 @@
     if (el._inner) el._inner.style.fontSize = fontFor(el._value);
   }
 
-  function createTileEl(tile) {
+  function createTileEl(tile, animate) {
     var el = document.createElement("div");
-    el.className = "tile new";
+    el.className = "tile" + (animate === false ? "" : " new");
     var inner = document.createElement("div");
     inner.className = "tile-inner " + valueClass(tile.value);
     inner.textContent = tile.value;
@@ -384,13 +415,56 @@
     }
   }
 
-  function renderAll() {
-    tilesEl.innerHTML = "";
-    tileMap = {};
+  /* ---------- Állapot mentés / visszaállítás ---------- */
+  function collectCells() {
+    var out = [];
     forEachCell(function (r, c) {
       var t = grid[r][c];
-      if (t) createTileEl(t);
+      if (t) out.push({ r: r, c: c, value: t.value });
     });
+    return out;
+  }
+
+  function snapshot() {
+    return { cells: collectCells(), score: score, won: !!grid._won };
+  }
+
+  // Egy pálya betöltése cellalistából (undo és visszaállítás; animáció nélkül).
+  function loadBoard(n, cells, sc, won) {
+    size = n;
+    lsSet("g2048_size", String(n));
+    grid = emptyGrid(n);
+    grid._won = !!won;
+    tilesEl.innerHTML = "";
+    tileMap = {};
+    buildGridBg();
+    cells.forEach(function (c) {
+      var tile = { id: idSeq++, r: c.r, c: c.c, value: c.value };
+      grid[c.r][c.c] = tile;
+      createTileEl(tile, false);
+    });
+    score = sc || 0;
+    scoreEl.textContent = score;
+    boardInfo.textContent = n + "×" + n;
+    bestEl.textContent = best[String(n)] || 0;
+  }
+
+  function saveState() {
+    lsSet("g2048_state", JSON.stringify({
+      size: size, score: score, won: !!grid._won, cells: collectCells()
+    }));
+  }
+
+  function restoreState() {
+    var raw = lsGet("g2048_state", null);
+    if (!raw) return false;
+    var s;
+    try { s = JSON.parse(raw); } catch (e) { return false; }
+    if (!s || !s.cells || !s.cells.length || SIZES.indexOf(s.size) < 0) return false;
+    loadBoard(s.size, s.cells, s.score || 0, s.won);
+    history = [];
+    updateUndoBtn();
+    return true;
   }
 
   function relayout() {
@@ -480,6 +554,7 @@
   function move(dir) {
     if (busy) return;
     if (overlay.classList.contains("show")) return; // választó nyitva
+    var pre = snapshot();
     var anyMoved = false;
     var totalGain = 0;
     var absorbed = [];
@@ -498,8 +573,15 @@
 
     if (!anyMoved) return;
 
+    // érvényes lépés: mentsük az előző állapotot az undóhoz
+    history.push(pre);
+    if (history.length > MAX_UNDO) history.shift();
+    updateUndoBtn();
+
     score += totalGain;
     scoreEl.textContent = score;
+
+    if (totalGain > 0) { playMerge(); if (navigator.vibrate) { try { navigator.vibrate(15); } catch (e) {} } }
 
     // animáljuk a mozgó csempéket új pozíciójukba;
     // az összeolvadó (eltűnő) csempe is odacsúszik a célcellába
@@ -528,6 +610,7 @@
 
       spawn();
       saveBest();
+      saveState();
       busy = false;
 
       if (isGameOver()) showSelect("Vége!", "Válassz pályát az újrakezdéshez", false);
@@ -609,6 +692,8 @@
   /* ---------- Új játék ---------- */
   function newGame() {
     hideOverlay();
+    history = [];
+    updateUndoBtn();
     score = 0;
     scoreEl.textContent = 0;
     grid = emptyGrid(size);
@@ -620,10 +705,70 @@
     bestEl.textContent = best[String(size)] || 0;
     spawn();
     spawn();
+    saveState();
+  }
+
+  /* ---------- Visszavonás ---------- */
+  function undo() {
+    if (!history.length) return;
+    hideOverlay();                 // vesztő/nyerő lépés is visszavonható
+    var s = history.pop();
+    loadBoard(size, s.cells, s.score, s.won);
+    updateUndoBtn();
+    saveState();
+  }
+
+  function updateUndoBtn() {
+    undoBtn.disabled = history.length === 0;
+  }
+
+  /* ---------- Hang + rezgés ---------- */
+  function ensureAudio() {
+    if (audioCtx) return;
+    try {
+      var AC = window.AudioContext || window.webkitAudioContext;
+      if (AC) audioCtx = new AC();
+    } catch (e) { audioCtx = null; }
+    if (audioCtx && audioCtx.state === "suspended") {
+      try { audioCtx.resume(); } catch (e) {}
+    }
+  }
+
+  function playMerge() {
+    if (!soundOn) return;
+    ensureAudio();
+    if (!audioCtx) return;
+    var t = audioCtx.currentTime;
+    var o = audioCtx.createOscillator();
+    var g = audioCtx.createGain();
+    o.type = "sine";
+    o.frequency.setValueAtTime(330, t);
+    o.frequency.exponentialRampToValueAtTime(520, t + 0.09);
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(0.11, t + 0.012);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 0.14);
+    o.connect(g).connect(audioCtx.destination);
+    o.start(t);
+    o.stop(t + 0.16);
+  }
+
+  function updateSoundBtn() {
+    soundBtn.textContent = soundOn ? "🔊" : "🔇";
+    soundBtn.setAttribute("aria-pressed", soundOn ? "true" : "false");
+  }
+
+  function toggleSound() {
+    soundOn = !soundOn;
+    lsSet("g2048_sound", soundOn ? "1" : "0");
+    updateSoundBtn();
+    if (soundOn) { ensureAudio(); playMerge(); }
   }
 
   /* ---------- Bemenet ---------- */
   document.addEventListener("keydown", function (e) {
+    if (e.key === "u" || e.key === "z" || e.key === "Backspace") {
+      e.preventDefault(); undo(); return;
+    }
     var map = { ArrowLeft: "L", ArrowRight: "R", ArrowUp: "U", ArrowDown: "D",
                 a: "L", d: "R", w: "U", s: "D" };
     var dir = map[e.key];
@@ -652,11 +797,15 @@
     showSelect("Új játék", "Válaszd ki a pályát", true);
   });
   continueBtn.addEventListener("click", hideOverlay);
+  undoBtn.addEventListener("click", undo);
+  soundBtn.addEventListener("click", toggleSound);
 
   window.addEventListener("resize", relayout);
 
   /* ---------- Indítás ---------- */
-  newGame();
+  updateSoundBtn();
+  if (!restoreState()) newGame();   // korábbi állás visszatöltése, ha van
+  updateUndoBtn();
 })();
 </script>
 </body>
