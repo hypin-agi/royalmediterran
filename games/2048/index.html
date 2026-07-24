@@ -97,6 +97,8 @@
     transition: background .15s;
   }
   .size-btn.active { background: var(--btn); color: var(--text-light); }
+  .size-picker.locked .size-btn { opacity: .45; cursor: not-allowed; }
+  .size-picker.locked .size-btn.active { opacity: 1; }
   .new-game {
     background: var(--btn);
     color: var(--text-light);
@@ -268,6 +270,7 @@
   var idSeq = 1;
   var tileMap = {};    // id -> DOM elem
   var busy = false;
+  var locked = false;  // igaz, ha már léptél — méret nem váltható
 
   /* ---------- Segédek ---------- */
   function emptyGrid(n) {
@@ -455,6 +458,9 @@
 
     if (!anyMoved) return;
 
+    // első érvényes lépés lezárja a méretválasztást
+    if (!locked) { locked = true; updatePickerState(); }
+
     score += totalGain;
     scoreEl.textContent = score;
 
@@ -541,11 +547,14 @@
     tileMap = {};
     buildGridBg();
     bestEl.textContent = best[String(size)] || 0;
+    locked = false;          // új játékban újra választható a méret
+    updatePickerState();
     spawn();
     spawn();
   }
 
   function setSize(n) {
+    if (locked) return;      // játék közben nem váltható
     size = n;
     localStorage.setItem("g2048_size", String(n));
     markActiveSize();
@@ -557,6 +566,13 @@
     btns.forEach(function (b) {
       b.classList.toggle("active", parseInt(b.dataset.size, 10) === size);
     });
+  }
+
+  function updatePickerState() {
+    var picker = document.getElementById("sizePicker");
+    picker.classList.toggle("locked", locked);
+    var btns = picker.querySelectorAll(".size-btn");
+    btns.forEach(function (b) { b.disabled = locked; });
   }
 
   /* ---------- Bemenet ---------- */
