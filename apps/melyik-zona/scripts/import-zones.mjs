@@ -55,21 +55,32 @@ for (let i = 1; i < args.length; i++) {
 }
 
 const CANDIDATES = {
-  code: ["code", "kod", "kód", "zona", "zóna", "zonakod", "zónakód", "zone_code", "ref", "zonaszam", "zone"],
-  name: ["name", "nev", "név", "megnevezes", "megnevezés", "title"],
-  city: ["city", "telepules", "település", "varos", "város"],
-  district: ["district", "kerulet", "kerület"],
-  category: ["category", "kategoria", "kategória", "ovezet", "övezet", "zone_type", "tipus", "típus"],
-  rate: ["rate", "dij", "díj", "oradij", "óradíj", "hourly_rate", "ar", "ár", "tarifa"],
-  hours: ["hours", "opening_hours", "idoszak", "időszak", "fizetos_idoszak", "sav"],
-  maxstay: ["maxstay", "max_stay", "max_varakozas", "maxvarakozas", "idokorlat", "időkorlát"],
-  operator: ["operator", "uzemelteto", "üzemeltető", "kezelo", "kezelő"],
+  code: ["code", "kod", "zona", "zonakod", "zone_code", "ref", "zonaszam", "zone"],
+  name: ["name", "nev", "megnevezes", "title"],
+  city: ["city", "telepules", "varos"],
+  district: ["district", "kerulet", "ker"],
+  category: ["category", "kategoria", "ovezet", "zone_type", "tipus"],
+  rate: ["rate", "dij", "oradij", "hourly_rate", "ar", "tarifa"],
+  hours: ["hours", "opening_hours", "idoszak", "fizetos_idoszak", "dijfizetesi_idoszak", "sav"],
+  maxstay: ["maxstay", "max_stay", "max_varakozas", "maxvarakozas", "idokorlat"],
+  operator: ["operator", "uzemelteto", "kezelo"],
 };
+
+function headerKey(name) {
+  return String(name)
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/ő/gi, "o")
+    .replace(/ű/gi, "u")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "_")
+    .replace(/^_|_$/g, "");
+}
 
 function pickField(properties, kind) {
   if (options[kind]) return options[kind];
   const keys = Object.keys(properties ?? {});
-  const lowered = new Map(keys.map((k) => [k.toLowerCase(), k]));
+  const lowered = new Map(keys.map((k) => [headerKey(k), k]));
   for (const candidate of CANDIDATES[kind]) {
     const hit = lowered.get(candidate);
     if (hit) return hit;

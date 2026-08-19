@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getDataset, hasOfficialData } from "@/lib/zoneDataset";
+import { getStreetZoneTable, hasStreetZoneTable } from "@/lib/streetZones";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -20,7 +21,21 @@ export async function GET() {
     cities.set(key, (cities.get(key) ?? 0) + 1);
   }
 
+  const streetTable = getStreetZoneTable();
+  const uniqueStreets = new Set(
+    streetTable.entries.map((e) => `${e.district ?? e.city ?? ""}|${e.key}`),
+  );
+
   return NextResponse.json({
+    streetTable: {
+      loaded: hasStreetZoneTable(),
+      version: streetTable.version,
+      source: streetTable.source,
+      license: streetTable.license,
+      entries: streetTable.entries.length,
+      uniqueStreets: uniqueStreets.size,
+      withHours: streetTable.entries.filter((e) => e.openingHours).length,
+    },
     official: {
       loaded: hasOfficialData(),
       version: dataset.version,
@@ -39,9 +54,15 @@ export async function GET() {
     layers: [
       {
         id: "official",
-        label: "Hivatalos zónakészlet",
+        label: "Hivatalos zóna-poligon",
         available: hasOfficialData(),
         gives: "zónakód, díj, fizetős időszak, pontos határ",
+      },
+      {
+        id: "street-table",
+        label: "Hivatalos utcajegyzék",
+        available: hasStreetZoneTable(),
+        gives: "zónakód utcanév + kerület alapján, poligon nélkül",
       },
       {
         id: "zone",

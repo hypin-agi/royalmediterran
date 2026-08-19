@@ -9,6 +9,11 @@
 import type { Verdict, ZoneLookup } from "./zone";
 import { getDataset, type ZoneFeature } from "./zoneDataset";
 import type { LatLon } from "./geo";
+import {
+  getStreetZoneTable,
+  lookupStreetIn,
+  type StreetZoneEntry,
+} from "./streetZones";
 
 /** Üres váz, ha az Overpass kiesett, de hivatalos adatunk van. */
 export function emptyLookup(point: LatLon): ZoneLookup {
@@ -96,6 +101,81 @@ export function applyOfficial(
       ...lookup.admin,
       city: lookup.admin.city ?? feature.city,
       district: lookup.admin.district ?? feature.district,
+    },
+  };
+}
+
+/**
+ * Utcajegyzék-réteg: a GPS-pont mellé az OpenStreetMapből megkapott utcanevet
+ * és kerületet összevetjük a hivatalos utcajegyzékkel.
+ *
+ * Akkor fut, ha nincs hivatalos poligon-találat. Ha az utca több zónán fut át,
+ * NEM választunk egyet: `code` marad null, és felsoroljuk a lehetőségeket.
+ */
+export function applyStreetZone(
+  lookup: ZoneLookup,
+  entries: StreetZoneEntry[] = getStreetZoneTable().entries,
+): ZoneLookup {
+  const result = lookupStreetIn(entries, lookup.streetName, {
+    district: lookup.admin.district,
+    city: lookup.admin.city,
+  });
+
+  if (result.status === "none") return lookup;
+
+  const table = getStreetZoneTable();
+  const first = result.entries[0];
+  const hasHouseRanges = result.entries.some((entry) => entry.houseNumbers);
+
+  if (result.status === "ambiguous") {
+    return {
+      ...lookup,
+      verdict: {
+        paid: "paid",
+        source: "street-table",
+        code: null,
+        confidence: "medium",
+        hoursExpression: first.openingHours,
+        charge:
+          first.hourlyRateHUF === null
+            ? null
+            : `${first.hourlyRateHUF.toLocaleString("hu-HU")} Ft/óra`,
+        maxstay: first.maxstay,
+        evidence: [
+          `${first.street}: a hivatalos utcajegyzék szerint fizetős, de ez a közterület több zónára esik.`,
+          "Házszám nélkül nem dönthető el, melyikbe tartozol — a zónatáblán ellenőrizd.",
+          `Adatkészlet: ${table.source} (${table.version}).`,
+        ],
+        alternatives: result.entries.map((entry) => ({
+          code: entry.code,
+          houseNumbers: entry.houseNumbers,
+        })),
+      },
+    };
+  }
+
+  return {
+    ...lookup,
+    verdict: {
+      paid: "paid",
+      source: "street-table",
+      code: result.code,
+      confidence: hasHouseRanges ? "medium" : "high",
+      hoursExpression: first.openingHours,
+      charge:
+        first.hourlyRateHUF === null
+          ? null
+          : `${first.hourlyRateHUF.toLocaleString("hu-HU")} Ft/óra`,
+      maxstay: first.maxstay,
+      evidence: [
+        `${first.street}: a hivatalos utcajegyzék szerint a ${result.code} zónába tartozik.`,
+        ...(hasHouseRanges
+          ? [
+              `A jegyzék házszám szerinti bontást is tartalmaz (${first.houseNumbers}) — a tábla a mérvadó.`,
+            ]
+          : []),
+        `Adatkészlet: ${table.source} (${table.version}).`,
+      ],
     },
   };
 }

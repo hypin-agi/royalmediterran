@@ -2,7 +2,8 @@ import { NextResponse } from "next/server";
 import { buildQuery, OverpassError, runOverpass } from "@/lib/overpass";
 import { parseLookup, type ZoneLookup } from "@/lib/zone";
 import { findZoneAt, getDataset, hasOfficialData } from "@/lib/zoneDataset";
-import { applyOfficial, emptyLookup } from "@/lib/officialLayer";
+import { applyOfficial, applyStreetZone, emptyLookup } from "@/lib/officialLayer";
+import { getStreetZoneTable, hasStreetZoneTable } from "@/lib/streetZones";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -91,7 +92,11 @@ export async function GET(request: Request) {
 
   try {
     const raw = await runOverpass(buildQuery(point, radius));
-    const lookup = applyOfficial(parseLookup(raw, point), official);
+    // Rétegsorrend: hivatalos poligon → hivatalos utcajegyzék → OSM.
+    const base = parseLookup(raw, point);
+    const lookup = official
+      ? applyOfficial(base, official)
+      : applyStreetZone(base);
     writeCache(key, lookup);
 
     const body: Record<string, unknown> = {
@@ -101,9 +106,17 @@ export async function GET(request: Request) {
     };
 
     body.dataset = {
-      loaded: hasOfficialData(),
-      version: getDataset().version,
-      source: getDataset().source,
+      polygons: {
+        loaded: hasOfficialData(),
+        version: getDataset().version,
+        source: getDataset().source,
+      },
+      streetTable: {
+        loaded: hasStreetZoneTable(),
+        version: getStreetZoneTable().version,
+        source: getStreetZoneTable().source,
+        entries: getStreetZoneTable().entries.length,
+      },
     };
 
     if (url.searchParams.get("debug") === "1") {

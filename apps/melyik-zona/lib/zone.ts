@@ -60,8 +60,12 @@ export type Verdict = {
   /** `paid` = fizetős szakasz, `free` = az adat szerint nem fizetős. */
   paid: "paid" | "free" | "unknown";
   /** Melyik rétegből jött a válasz. */
-  /** `official` = repóba importált hivatalos zónakészlet (a legerősebb). */
-  source: "official" | "zone" | "street" | "lot" | "none";
+  /**
+   * `official`      = importált hivatalos zóna-poligon (a legerősebb),
+   * `street-table`  = hivatalos utcajegyzék (utcanév → zónakód),
+   * `zone`/`street` = OpenStreetMap poligon, illetve úttest-tagek.
+   */
+  source: "official" | "street-table" | "zone" | "street" | "lot" | "none";
   /** A zónakód, ha bármelyik réteg tudja. */
   code: string | null;
   confidence: Confidence;
@@ -71,6 +75,11 @@ export type Verdict = {
   maxstay: string | null;
   /** Emberi nyelvű indoklás, mire alapoztuk a választ. */
   evidence: string[];
+  /**
+   * Szóba jövő kódok, ha egyetlenre nem tudunk rámutatni (pl. az utca két
+   * zónán fut át házszám szerint). Ilyenkor `code` szándékosan null.
+   */
+  alternatives?: { code: string; houseNumbers: string | null }[];
 };
 
 export type ZoneLookup = {

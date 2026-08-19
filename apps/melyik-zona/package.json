@@ -8,9 +8,10 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "test": "tsc -p tsconfig.test.json && node tests/lookup.test.cjs && node tests/hours.test.cjs && node tests/dataset.test.cjs && node tests/pipeline.test.cjs",
+    "test": "tsc -p tsconfig.test.json && node tests/lookup.test.cjs && node tests/hours.test.cjs && node tests/dataset.test.cjs && node tests/streetNames.test.cjs && node tests/pipeline.test.cjs",
     "verify:zones": "node scripts/verify-zones.mjs",
-    "import:zones": "node scripts/import-zones.mjs"
+    "import:zones": "node scripts/import-zones.mjs",
+    "import:street-zones": "node scripts/import-street-zones.mjs"
   },
   "dependencies": {
     "leaflet": "1.9.4",

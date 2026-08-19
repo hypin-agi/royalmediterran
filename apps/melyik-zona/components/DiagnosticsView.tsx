@@ -13,7 +13,7 @@ type ProbePoint = {
 
 type Verdict = {
   paid: "paid" | "free" | "unknown";
-  source: "official" | "zone" | "street" | "lot" | "none";
+  source: "official" | "street-table" | "zone" | "street" | "lot" | "none";
   code: string | null;
   confidence: string;
   hoursExpression: string | null;
@@ -39,12 +39,20 @@ type Status = {
     withCode: number;
     withHours: number;
   };
+  streetTable: {
+    loaded: boolean;
+    version: string;
+    source: string;
+    entries: number;
+    uniqueStreets: number;
+  };
 };
 
 const POINTS = (probeData as { points: ProbePoint[] }).points;
 
 const SOURCE_LABEL: Record<Verdict["source"], string> = {
-  official: "hivatalos",
+  official: "hivatalos poligon",
+  "street-table": "utcajegyzék",
   zone: "OSM zóna",
   street: "OSM utca",
   lot: "parkoló",
@@ -158,9 +166,14 @@ export default function DiagnosticsView() {
     const lines = [
       `Melyik Zóna? — diagnosztika`,
       `Futtatva: ${new Date().toISOString()}`,
-      `Hivatalos adatkészlet: ${
+      `Hivatalos poligonok: ${
         status?.official.loaded
           ? `betöltve, ${status.official.zoneCount} zóna (${status.official.source})`
+          : "NINCS betöltve"
+      }`,
+      `Hivatalos utcajegyzék: ${
+        status?.streetTable.loaded
+          ? `betöltve, ${status.streetTable.uniqueStreets} közterület (${status.streetTable.source})`
           : "NINCS betöltve"
       }`,
       ``,
@@ -209,31 +222,47 @@ export default function DiagnosticsView() {
         <h2>Adatforrás állapota</h2>
         {status === null ? (
           <p style={{ margin: 0 }}>Betöltés…</p>
-        ) : status.official.loaded ? (
-          <div className="statusbar is-free">
-            <span className="dot" aria-hidden />
-            <span>
-              Hivatalos zónakészlet betöltve
-              <small>
-                {status.official.zoneCount.toLocaleString("hu-HU")} zóna, ebből{" "}
-                {status.official.withCode.toLocaleString("hu-HU")} kóddal ·{" "}
-                {status.official.source} ({status.official.version})
-              </small>
-            </span>
-          </div>
         ) : (
-          <div className="statusbar is-paid">
-            <span className="dot" aria-hidden />
-            <span>
-              Nincs betöltve hivatalos zónakészlet
-              <small>
-                Az oldal jelenleg kizárólag az OpenStreetMap adataira
-                támaszkodik. A magyar zónakódok ott hiányosak, ezért a lenti
-                mérés azt fogja megmutatni, hol tudunk és hol nem tudunk kódot
-                mondani.
-              </small>
-            </span>
-          </div>
+          <>
+            <div
+              className={`statusbar ${status.official.loaded ? "is-free" : "is-unknown"}`}
+            >
+              <span className="dot" aria-hidden />
+              <span>
+                Hivatalos zóna-poligonok:{" "}
+                {status.official.loaded ? "betöltve" : "nincsenek betöltve"}
+                <small>
+                  {status.official.loaded
+                    ? `${status.official.zoneCount.toLocaleString("hu-HU")} zóna, ebből ${status.official.withCode.toLocaleString("hu-HU")} kóddal · ${status.official.source} (${status.official.version})`
+                    : "Ez adná a legpontosabb választ: pont-a-poligonban számítással, zónahatárra pontosan."}
+                </small>
+              </span>
+            </div>
+
+            <div
+              className={`statusbar ${status.streetTable.loaded ? "is-free" : "is-unknown"}`}
+            >
+              <span className="dot" aria-hidden />
+              <span>
+                Hivatalos utcajegyzék:{" "}
+                {status.streetTable.loaded ? "betöltve" : "nincs betöltve"}
+                <small>
+                  {status.streetTable.loaded
+                    ? `${status.streetTable.uniqueStreets.toLocaleString("hu-HU")} közterület, ${status.streetTable.entries.toLocaleString("hu-HU")} sor · ${status.streetTable.source} (${status.streetTable.version})`
+                    : "Ez poligon nélkül is megadná a zónakódot: utcanév + kerület alapján. Táblázatként jóval könnyebb beszerezni."}
+                </small>
+              </span>
+            </div>
+
+            {!status.official.loaded && !status.streetTable.loaded && (
+              <div className="note warn">
+                Egyik hivatalos forrás sincs betöltve, így az oldal most csak az
+                OpenStreetMapre támaszkodik — abban pedig a magyar zónakódok
+                hiányosak. A lenti mérés pontosan megmutatja, ez mit jelent a
+                gyakorlatban.
+              </div>
+            )}
+          </>
         )}
       </div>
 

@@ -121,3 +121,74 @@ ok("két egymás melletti zóna között a határ helyesen dönt", () => {
 });
 
 console.log("\n" + pass + " teszt futott le sikeresen.");
+
+// ---------------------------------------------------------------------------
+// Utcajegyzék-útvonal: poligon nélkül, pusztán utcanév + kerület alapján.
+// Ez a legkönnyebben beszerezhető hivatalos adat, ezért külön is bizonyítjuk.
+
+const sn = require("../.test-build/lib/streetNames.js");
+
+const tableEntry = (street, district, code, extra = {}) => ({
+  street, key: sn.normalizeStreet(street), city: "Budapest", district, code,
+  houseNumbers: extra.houseNumbers ?? null,
+  openingHours: extra.openingHours ?? null,
+  hourlyRateHUF: extra.hourlyRateHUF ?? null,
+  maxstay: extra.maxstay ?? null,
+});
+
+const STREET_TABLE = [
+  tableEntry("Tűzoltó u.", 9, "3061", { openingHours: "Mo-Fr 08:00-18:00", hourlyRateHUF: 600, maxstay: "3 h" }),
+  tableEntry("Ráday utca", 9, "3061", { houseNumbers: "1-25" }),
+  tableEntry("Ráday utca", 9, "3062", { houseNumbers: "27-99" }),
+];
+
+function osmWithStreet(name) {
+  return { elements: [
+    { type: "area", id: 3_600_000_001, tags: { boundary: "administrative", admin_level: "8", name: "Budapest" } },
+    { type: "area", id: 3_600_000_002, tags: { boundary: "administrative", admin_level: "9", name: "IX. kerület" } },
+    { type: "way", id: 900, tags: { highway: "residential", name },
+      geometry: [{ lat: 47.4849, lon: 19.0669 }, { lat: 47.4851, lon: 19.0671 }] },
+  ]};
+}
+
+ok("GPS → utcanév → hivatalos utcajegyzék → zónakód", () => {
+  const base = zone.parseLookup(osmWithStreet("Tűzoltó utca"), POINT);
+  assert.strictEqual(base.verdict.code, null, "önmagában az OSM nem tud kódot");
+
+  const withTable = official.applyStreetZone(base, STREET_TABLE);
+  assert.strictEqual(withTable.verdict.source, "street-table");
+  assert.strictEqual(withTable.verdict.code, "3061");
+  assert.strictEqual(withTable.verdict.paid, "paid");
+  assert.strictEqual(withTable.verdict.confidence, "high");
+  assert.strictEqual(withTable.verdict.hoursExpression, "Mo-Fr 08:00-18:00");
+  assert.ok(withTable.verdict.charge.includes("600"));
+});
+
+ok("házszám szerint megosztott utcánál kódot nem, alternatívákat adunk", () => {
+  const base = zone.parseLookup(osmWithStreet("Ráday utca"), POINT);
+  const withTable = official.applyStreetZone(base, STREET_TABLE);
+
+  assert.strictEqual(withTable.verdict.source, "street-table");
+  assert.strictEqual(withTable.verdict.paid, "paid", "azt tudjuk, hogy fizetős");
+  assert.strictEqual(withTable.verdict.code, null, "de a kódot nem találjuk ki");
+  assert.deepStrictEqual(
+    withTable.verdict.alternatives.map((a) => a.code).sort(),
+    ["3061", "3062"],
+  );
+  assert.ok(withTable.verdict.evidence.some((e) => e.includes("több zónára")));
+});
+
+ok("jegyzékben nem szereplő utca nem kap kitalált kódot", () => {
+  const base = zone.parseLookup(osmWithStreet("Ismeretlen utca"), POINT);
+  const withTable = official.applyStreetZone(base, STREET_TABLE);
+  assert.strictEqual(withTable.verdict.code, null);
+  assert.strictEqual(withTable.verdict.source, "none");
+});
+
+ok("üres jegyzékkel a válasz változatlan marad", () => {
+  const base = zone.parseLookup(osmWithStreet("Tűzoltó utca"), POINT);
+  const withTable = official.applyStreetZone(base, []);
+  assert.deepStrictEqual(withTable.verdict, base.verdict);
+});
+
+console.log("\n" + pass + " teszt futott le sikeresen (utcajegyzékkel együtt).");

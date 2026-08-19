@@ -3,10 +3,13 @@ import ZoneFinder from "@/components/ZoneFinder";
 import SiteHeader from "@/components/SiteHeader";
 import SiteFooter from "@/components/SiteFooter";
 import { getDataset, hasOfficialData } from "@/lib/zoneDataset";
+import { getStreetZoneTable, hasStreetZoneTable } from "@/lib/streetZones";
 
 export default function Home() {
   const official = hasOfficialData();
+  const streetTable = hasStreetZoneTable();
   const dataset = getDataset();
+  const streets = getStreetZoneTable();
 
   return (
     <>
@@ -24,11 +27,16 @@ export default function Home() {
             </p>
             <ZoneFinder />
 
-            {official ? (
+            {official || streetTable ? (
               <p className="hint">
-                Hivatalos zónakészlet betöltve:{" "}
-                {dataset.features.length.toLocaleString("hu-HU")} zóna ·{" "}
-                {dataset.source}
+                Hivatalos adat betöltve:{" "}
+                {official
+                  ? `${dataset.features.length.toLocaleString("hu-HU")} zónahatár`
+                  : null}
+                {official && streetTable ? " · " : null}
+                {streetTable
+                  ? `${streets.entries.length.toLocaleString("hu-HU")} utcajegyzék-sor`
+                  : null}
               </p>
             ) : (
               <div className="note warn" style={{ textAlign: "left" }}>

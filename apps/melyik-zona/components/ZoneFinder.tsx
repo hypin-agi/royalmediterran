@@ -62,13 +62,14 @@ type ParkingLot = {
 
 type Verdict = {
   paid: "paid" | "free" | "unknown";
-  source: "zone" | "street" | "lot" | "none";
+  source: "official" | "street-table" | "zone" | "street" | "lot" | "none";
   code: string | null;
   confidence: "high" | "medium" | "low";
   hoursExpression: string | null;
   charge: string | null;
   maxstay: string | null;
   evidence: string[];
+  alternatives?: { code: string; houseNumbers: string | null }[];
 };
 
 type ZoneResponse = {
@@ -102,6 +103,8 @@ const CONFIDENCE_LABEL: Record<Verdict["confidence"], string> = {
 };
 
 const SOURCE_LABEL: Record<Verdict["source"], string> = {
+  official: "hivatalos zónahatár",
+  "street-table": "hivatalos utcajegyzék",
   zone: "zónahatár a térképadatból",
   street: "az úttestre rögzített adat",
   lot: "közeli parkoló adata",
@@ -369,13 +372,29 @@ export default function ZoneFinder() {
               )}
             </div>
 
-            {!verdict.code && verdict.paid === "paid" && (
-              <div className="note warn">
-                A hely fizetős, de a zónakódot a térképadat nem tartalmazza. A
-                kód az utcai zónatáblán és a parkolóautomatán van kiírva — és
-                lent a hivatalos zónatérképen is megnézheted.
-              </div>
-            )}
+            {!verdict.code &&
+              verdict.paid === "paid" &&
+              (verdict.alternatives && verdict.alternatives.length > 0 ? (
+                <div className="note warn">
+                  <strong>Ez a közterület több zónára esik.</strong> Házszám
+                  nélkül nem tudjuk eldönteni, melyikbe tartozol — a zónatáblán
+                  ellenőrizd:
+                  <ul className="plain" style={{ marginTop: 10 }}>
+                    {verdict.alternatives.map((alt) => (
+                      <li key={`${alt.code}-${alt.houseNumbers ?? ""}`}>
+                        <strong>{alt.code}</strong>
+                        {alt.houseNumbers ? ` — ${alt.houseNumbers} házszám` : ""}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ) : (
+                <div className="note warn">
+                  A hely fizetős, de a zónakódot a térképadat nem tartalmazza. A
+                  kód az utcai zónatáblán és a parkolóautomatán van kiírva — és
+                  lent a hivatalos zónatérképen is megnézheted.
+                </div>
+              ))}
 
             <div className="chips">
               {place && (

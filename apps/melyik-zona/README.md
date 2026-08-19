@@ -67,10 +67,34 @@ nem az OSM:
 
 | # | Réteg | Mit ad | Megbízhatóság |
 |---|-------|--------|---------------|
-| 0 | **Hivatalos zónakészlet** (`data/zones.json`) | zónakód, díj, időszak, pontos határ | magas |
-| 1 | OSM zóna-poligon (`zone=parking`) | zónakód, ha az OSM tárolja | közepes |
-| 2 | OSM úttest-tagek (`parking:*`) | fizetős-e a szakasz, néha kód | gyenge–közepes |
-| 3 | Közeli `amenity=parking` | csak kontextus | gyenge |
+| 0 | **Hivatalos zóna-poligon** (`data/zones.json`) | zónakód, díj, időszak, pontos határ | magas |
+| 1 | **Hivatalos utcajegyzék** (`data/street-zones.json`) | zónakód utcanév + kerület alapján | magas |
+| 2 | OSM zóna-poligon (`zone=parking`) | zónakód, ha az OSM tárolja | közepes |
+| 3 | OSM úttest-tagek (`parking:*`) | fizetős-e a szakasz, néha kód | gyenge–közepes |
+| 4 | Közeli `amenity=parking` | csak kontextus | gyenge |
+
+### A két hivatalos út — és miért van kettő
+
+A zónahatárokat **poligonként** megszerezni nehéz. A szolgáltatók viszont
+**utcajegyzékként** is közzéteszik, melyik közterület melyik zónába tartozik —
+ezt táblázatként jóval könnyebb beszerezni.
+
+A GPS-pontból az OpenStreetMap megbízhatóan megadja a legközelebbi utca nevét
+és a kerületet. Ezt a hivatalos utcajegyzékkel összekapcsolva a zónakód
+**poligon nélkül is** megvan:
+
+```
+GPS  →  OSM: "Tűzoltó utca", IX. kerület  →  utcajegyzék  →  3061
+```
+
+A névillesztés normalizálva történik (`lib/streetNames.ts`), mert a jegyzék
+„Tűzoltó u."-t ír, az OSM „Tűzoltó utcá"-t. Amit **nem** vonunk össze: a
+„Váci út" és a „Váci utca" két külön közterület, más zónában — ezek
+egybemosása rosszabb lenne, mint a találat hiánya.
+
+Ha egy közterület több zónára esik (jellemzően házszám szerint), **nem
+választunk**: kimondjuk, hogy fizetős, felsoroljuk a szóba jövő kódokat, és a
+táblához irányítunk. Egy tippelt kód büntetést ér.
 
 Ha egyik réteg sem tud semmit, a válasz `unknown` — **nem** „ingyenes”.
 
@@ -97,6 +121,21 @@ hiteles adat: azért van ott, hogy a gyanús eltérések kiugorjanak.
 ### Hivatalos zónaadat betöltése
 
 Ez a lépés teszi a terméket használhatóvá ott, ahol az OSM nem elég.
+Bármelyik forma megteszi — az utcajegyzék a könnyebben beszerezhető.
+
+**A) Utcajegyzék (CSV vagy JSON, akár URL-ről)**
+
+```bash
+node scripts/import-street-zones.mjs utcajegyzek.csv \\
+  --source "a forrás megnevezése" \\
+  --license "a licenc megnevezése"
+```
+
+Az oszlopneveket ékezet-érzéketlenül ismeri fel (`Közterület`, `Zónakód`,
+`Kerület`, `Házszám`, `Fizetős időszak`, `Óradíj`, `Időkorlát`), és jelenti,
+hány közterület esik több zónára — ezeknél az app nem fog tippelni.
+
+**B) Zóna-poligonok (GeoJSON)**
 
 ```bash
 # a hivatalos állomány WGS84-ben kell legyen; ha EOV-ban van:
@@ -199,18 +238,24 @@ lib/
   streetParking.ts         az úttestre tagelt parkolási adat értelmezése
   openingHours.ts          idősáv-kiértékelés + magyar munkaszüneti napok
   cities.ts                városközpontok a lefedettségi bontáshoz
-  zoneDataset.ts           hivatalos zónakészlet: bbox-index + pont-a-poligonban
-  officialLayer.ts         a hivatalos találat beillesztése a válaszba
+  zoneDataset.ts           hivatalos zóna-poligonok: bbox-index + pont-a-poligonban
+  streetZones.ts           utcanév + kerület → zónakód, egyértelműség-kezeléssel
+  streetNames.ts           magyar közterületnevek normalizálása
+  officialLayer.ts         a hivatalos találatok beillesztése a válaszba
 data/
-  zones.json               a hivatalos zónakészlet (alapból üres)
+  zones.json               hivatalos zóna-poligonok (alapból üres)
+  street-zones.json        hivatalos utcajegyzék (alapból üres)
   probe-points.json        ellenőrző pontok a méréshez
 scripts/
   import-zones.mjs         hivatalos GeoJSON → data/zones.json
+  import-street-zones.mjs  utcajegyzék CSV/JSON → data/street-zones.json
+  _streetNames.mjs         a normalizáló JS-párja (tesztelt egyezéssel)
   verify-zones.mjs         éles mérés: hány ponton van zónakód
 tests/
   lookup.test.cjs          geometria, tag-értelmezés, rétegzett verdikt
   hours.test.cjs           idősáv-kiértékelés, ünnepnapok, időzóna
   dataset.test.cjs         zónakészlet keresés, lyukas poligon, bbox
+  streetNames.test.cjs     normalizálás, kerület-egyértelműsítés, út≠utca
   pipeline.test.cjs        végponttól végpontig: koordináta → kód → időszak
 ```
 
