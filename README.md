@@ -42,6 +42,16 @@ Minden ügyfélnek van egy **`CONTEXT.md`** (a belépési pont, amit Claude elő
     └── royal-mediterran/      ← első valós ügyfél
 ```
 
+## Appok
+
+A `apps/` alatt a tudásbázistól független, önállóan deployolható webalkalmazások élnek.
+
+| App | Mit csinál | Deploy |
+|-----|------------|--------|
+| [`apps/melyik-zona`](apps/melyik-zona/) | GPS-alapú parkolási zóna kereső — egy gomb, és megmondja, melyik zónában áll az autó | Vercel (`melyik-zona`) |
+
+---
+
 ## Új ügyfél felvétele
 
 ```bash
