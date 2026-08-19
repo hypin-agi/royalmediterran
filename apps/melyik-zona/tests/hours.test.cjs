@@ -1,5 +1,5 @@
 const assert = require("node:assert");
-const oh = require("../.test-build/openingHours.js");
+const oh = require("../.test-build/lib/openingHours.js");
 
 let pass = 0;
 function ok(name, fn) {

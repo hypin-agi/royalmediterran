@@ -1,7 +1,7 @@
 const assert = require("node:assert");
-const geo = require("../.test-build/geo.js");
-const zone = require("../.test-build/zone.js");
-const sp = require("../.test-build/streetParking.js");
+const geo = require("../.test-build/lib/geo.js");
+const zone = require("../.test-build/lib/zone.js");
+const sp = require("../.test-build/lib/streetParking.js");
 
 let pass = 0;
 function ok(name, fn) {

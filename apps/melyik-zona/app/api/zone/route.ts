@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { buildQuery, OverpassError, runOverpass } from "@/lib/overpass";
 import { parseLookup, type ZoneLookup } from "@/lib/zone";
+import { findZoneAt, getDataset, hasOfficialData } from "@/lib/zoneDataset";
+import { applyOfficial, emptyLookup } from "@/lib/officialLayer";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -59,11 +61,13 @@ export async function GET(request: Request) {
     );
   }
 
-  // Kereső sugár — alapból 600 m, hibakereséshez felülírható.
+  // Kereső sugár a zóna-geometriához. Az `around` a zóna határához mér, ezért
+  // az alapérték nagyvonalú: kisebb sugárral egy nagy zóna közepén állva nem
+  // találnánk meg a saját zónánkat.
   const radiusParam = Number(url.searchParams.get("radius"));
   const radius = Number.isFinite(radiusParam)
-    ? Math.min(2000, Math.max(100, Math.round(radiusParam)))
-    : 600;
+    ? Math.min(3000, Math.max(100, Math.round(radiusParam)))
+    : 1500;
 
   const key = `${cacheKey(lat, lon)}@${radius}`;
   const cached = readCache(key);
@@ -81,9 +85,13 @@ export async function GET(request: Request) {
 
   const point = { lat, lon };
 
+  // 0. réteg: hivatalos zónakészlet. Ha ez talál, minden mást felülír, és
+  // akkor is tudunk válaszolni, ha az Overpass épp nem elérhető.
+  const official = findZoneAt(point);
+
   try {
     const raw = await runOverpass(buildQuery(point, radius));
-    const lookup = parseLookup(raw, point);
+    const lookup = applyOfficial(parseLookup(raw, point), official);
     writeCache(key, lookup);
 
     const body: Record<string, unknown> = {
@@ -92,9 +100,16 @@ export async function GET(request: Request) {
       attribution: ATTRIBUTION,
     };
 
+    body.dataset = {
+      loaded: hasOfficialData(),
+      version: getDataset().version,
+      source: getDataset().source,
+    };
+
     if (url.searchParams.get("debug") === "1") {
       body.debug = {
         radius,
+        officialMatch: official ? official.feature.code : null,
         elementCount: raw.elements.length,
         byType: raw.elements.reduce<Record<string, number>>((acc, element) => {
           acc[element.type] = (acc[element.type] ?? 0) + 1;
@@ -115,6 +130,19 @@ export async function GET(request: Request) {
     });
   } catch (error) {
     if (error instanceof OverpassError) {
+      // Ha van hivatalos zónatalálat, az Overpass kiesése nem akadály:
+      // a lényegi választ (zónakód, időszak) enélkül is meg tudjuk adni.
+      if (official) {
+        return NextResponse.json(
+          {
+            ...applyOfficial(emptyLookup(point), official),
+            degraded:
+              "Az OpenStreetMap lekérdezés most nem elérhető, ezért utcanév és térkép nélkül válaszolunk. A zónaadat a hivatalos készletből származik.",
+            attribution: ATTRIBUTION,
+          },
+          { status: 200 },
+        );
+      }
       return NextResponse.json(
         {
           error:
@@ -133,3 +161,4 @@ export async function GET(request: Request) {
     );
   }
 }
+

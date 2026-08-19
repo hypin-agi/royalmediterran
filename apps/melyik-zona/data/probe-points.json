@@ -1,0 +1,27 @@
+{
+  "note": "Ellenőrző pontok a koordináta → zóna leképezés méréséhez. A koordináták közismert közterületek hozzávetőleges középpontjai (±100 m), az `expectation` mező pedig EMBERI VÁRAKOZÁS, nem hiteles adat: arra való, hogy a gyanús eltérések kiugorjanak a jelentésben. Semmit nem állítunk igaznak pusztán azért, mert itt szerepel.",
+  "points": [
+    { "id": "bp-v-deak", "label": "Budapest V. — Deák Ferenc tér", "lat": 47.4979, "lon": 19.0546, "expectation": "paid" },
+    { "id": "bp-v-kalvin", "label": "Budapest V. — Kálvin tér", "lat": 47.4900, "lon": 19.0605, "expectation": "paid" },
+    { "id": "bp-vi-oktogon", "label": "Budapest VI. — Oktogon", "lat": 47.5054, "lon": 19.0630, "expectation": "paid" },
+    { "id": "bp-vii-blaha", "label": "Budapest VII. — Blaha Lujza tér", "lat": 47.4966, "lon": 19.0700, "expectation": "paid" },
+    { "id": "bp-viii-corvin", "label": "Budapest VIII. — Corvin-negyed", "lat": 47.4855, "lon": 19.0770, "expectation": "paid" },
+    { "id": "bp-ix-raday", "label": "Budapest IX. — Ráday utca", "lat": 47.4864, "lon": 19.0640, "expectation": "paid" },
+    { "id": "bp-ix-boraros", "label": "Budapest IX. — Boráros tér", "lat": 47.4770, "lon": 19.0648, "expectation": "paid" },
+    { "id": "bp-ix-tuzolto", "label": "Budapest IX. — Tűzoltó utca", "lat": 47.4830, "lon": 19.0730, "expectation": "paid" },
+    { "id": "bp-xi-moricz", "label": "Budapest XI. — Móricz Zsigmond körtér", "lat": 47.4770, "lon": 19.0480, "expectation": "paid" },
+    { "id": "bp-xiii-nyugati", "label": "Budapest XIII. — Nyugati tér", "lat": 47.5106, "lon": 19.0570, "expectation": "paid" },
+    { "id": "bp-ii-szell", "label": "Budapest II. — Széll Kálmán tér", "lat": 47.5069, "lon": 19.0246, "expectation": "paid" },
+    { "id": "bp-i-batthyany", "label": "Budapest I. — Batthyány tér", "lat": 47.5060, "lon": 19.0380, "expectation": "paid" },
+    { "id": "bp-xiv-hosok", "label": "Budapest XIV. — Hősök tere", "lat": 47.5150, "lon": 19.0777, "expectation": "paid" },
+    { "id": "szeged-dom", "label": "Szeged — Dóm tér", "lat": 46.2500, "lon": 20.1480, "expectation": "paid" },
+    { "id": "debrecen-kossuth", "label": "Debrecen — Kossuth tér", "lat": 47.5310, "lon": 21.6250, "expectation": "paid" },
+    { "id": "pecs-szechenyi", "label": "Pécs — Széchenyi tér", "lat": 46.0760, "lon": 18.2280, "expectation": "paid" },
+    { "id": "gyor-szechenyi", "label": "Győr — Széchenyi tér", "lat": 47.6860, "lon": 17.6360, "expectation": "paid" },
+    { "id": "miskolc-varoshaz", "label": "Miskolc — Városház tér", "lat": 48.1030, "lon": 20.7780, "expectation": "paid" },
+    { "id": "eger-dobo", "label": "Eger — Dobó tér", "lat": 47.9020, "lon": 20.3760, "expectation": "paid" },
+    { "id": "siofok-fo", "label": "Siófok — Fő tér", "lat": 46.9050, "lon": 18.0570, "expectation": "paid" },
+    { "id": "kontroll-hortobagy", "label": "Kontroll: Hortobágy, puszta", "lat": 47.5850, "lon": 21.1500, "expectation": "free" },
+    { "id": "kontroll-bakony", "label": "Kontroll: Bakony, erdő", "lat": 47.2200, "lon": 17.7000, "expectation": "free" }
+  ]
+}

@@ -60,7 +60,8 @@ export type Verdict = {
   /** `paid` = fizetős szakasz, `free` = az adat szerint nem fizetős. */
   paid: "paid" | "free" | "unknown";
   /** Melyik rétegből jött a válasz. */
-  source: "zone" | "street" | "lot" | "none";
+  /** `official` = repóba importált hivatalos zónakészlet (a legerősebb). */
+  source: "official" | "zone" | "street" | "lot" | "none";
   /** A zónakód, ha bármelyik réteg tudja. */
   code: string | null;
   confidence: Confidence;

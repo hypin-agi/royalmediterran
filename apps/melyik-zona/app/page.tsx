@@ -2,8 +2,12 @@ import Link from "next/link";
 import ZoneFinder from "@/components/ZoneFinder";
 import SiteHeader from "@/components/SiteHeader";
 import SiteFooter from "@/components/SiteFooter";
+import { getDataset, hasOfficialData } from "@/lib/zoneDataset";
 
 export default function Home() {
+  const official = hasOfficialData();
+  const dataset = getDataset();
+
   return (
     <>
       <SiteHeader />
@@ -19,6 +23,22 @@ export default function Home() {
               fizetős időszak. A parkoló-applikációk ezért külön díjat kérnek.
             </p>
             <ZoneFinder />
+
+            {official ? (
+              <p className="hint">
+                Hivatalos zónakészlet betöltve:{" "}
+                {dataset.features.length.toLocaleString("hu-HU")} zóna ·{" "}
+                {dataset.source}
+              </p>
+            ) : (
+              <div className="note warn" style={{ textAlign: "left" }}>
+                <strong>Zónakódot jelenleg nem minden helyen tudunk mondani.</strong>{" "}
+                Az oldal most kizárólag nyílt térképadatból dolgozik, amiben a
+                magyar zónakódok hiányosak. Hogy ez ne feltételezés legyen:{" "}
+                <Link href="/diagnosztika">a diagnosztika oldalon</Link> le tudod
+                mérni, mit tud a rendszer ismert budapesti és vidéki pontokon.
+              </div>
+            )}
           </div>
         </section>
 

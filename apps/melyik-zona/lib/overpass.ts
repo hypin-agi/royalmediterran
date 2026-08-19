@@ -47,7 +47,7 @@ const USER_AGENT =
  *     `parking:*` tag. Innen jön a fizetős/ingyenes tény és sokszor a zónakód is.
  *  4. Közeli `amenity=parking` területek — parkolók, ha az utcán nincs adat.
  */
-export function buildQuery(point: LatLon, aroundMeters = 600): string {
+export function buildQuery(point: LatLon, aroundMeters = 1500): string {
   const lat = point.lat.toFixed(6);
   const lon = point.lon.toFixed(6);
   return `[out:json][timeout:25];
