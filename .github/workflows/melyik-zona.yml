@@ -1,0 +1,29 @@
+name: Melyik Zóna
+
+on:
+  push:
+    paths:
+      - "apps/melyik-zona/**"
+      - ".github/workflows/melyik-zona.yml"
+  pull_request:
+    paths:
+      - "apps/melyik-zona/**"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/melyik-zona
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: apps/melyik-zona/package-lock.json
+      - run: npm ci
+      # A zóna-logika tesztjei hálózat nélkül futnak: geometria, tag-értelmezés,
+      # idősávok, és a koordináta → zónakód útvonal végponttól végpontig.
+      - run: npm test
+      - run: npm run build
