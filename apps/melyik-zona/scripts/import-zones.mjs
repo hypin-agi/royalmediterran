@@ -3,7 +3,9 @@
  * Hivatalos parkolási zóna GeoJSON → data/zones.json
  *
  * Használat:
- *   node scripts/import-zones.mjs <bemenet.geojson> [opciók]
+ *   node scripts/import-zones.mjs <bemenet.geojson|URL> [opciók]
+ *
+ * A bemenet lehet helyi fájl vagy közvetlen http(s) URL is.
  *
  * Opciók:
  *   --code <mező>       a zónakódot tartalmazó property neve
@@ -34,7 +36,7 @@ import { dirname, resolve } from "node:path";
 
 const args = process.argv.slice(2);
 if (args.length === 0 || args[0].startsWith("--")) {
-  console.error("Használat: node scripts/import-zones.mjs <bemenet.geojson> [opciók]");
+  console.error("Használat: node scripts/import-zones.mjs <bemenet.geojson|URL> [opciók]");
   console.error("A teljes opciólista a fájl fejlécében található.");
   process.exit(1);
 }
@@ -123,7 +125,23 @@ function computeBbox(polygons) {
 /** Magyarország befoglaló téglalapja — a józansági ellenőrzéshez. */
 const HU = { south: 45.5, west: 15.9, north: 48.8, east: 23.1 };
 
-const raw = JSON.parse(readFileSync(resolve(inputPath), "utf8"));
+async function loadInput(source) {
+  if (/^https?:\/\//i.test(source)) {
+    console.log(`Letöltés: ${source}`);
+    const response = await fetch(source, {
+      headers: { Accept: "application/geo+json, application/json" },
+      signal: AbortSignal.timeout(120_000),
+    });
+    if (!response.ok) {
+      console.error(`HIBA: a letöltés ${response.status} státusszal tért vissza.`);
+      process.exit(1);
+    }
+    return JSON.parse(await response.text());
+  }
+  return JSON.parse(readFileSync(resolve(source), "utf8"));
+}
+
+const raw = await loadInput(inputPath);
 const features = raw.type === "FeatureCollection" ? raw.features : [raw];
 
 if (!Array.isArray(features) || features.length === 0) {
