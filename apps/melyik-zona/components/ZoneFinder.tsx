@@ -173,6 +173,9 @@ export default function ZoneFinder() {
     [data],
   );
 
+  // Stabil referencia kell, különben a térkép minden renderben újraépülne.
+  const outline = useMemo(() => primary?.outline ?? [], [primary]);
+
   const copyCode = useCallback(async (code: string) => {
     try {
       await navigator.clipboard.writeText(code);
@@ -332,7 +335,7 @@ export default function ZoneFinder() {
               <ZoneMap
                 point={fix.point}
                 accuracyMeters={fix.accuracy}
-                outline={primary?.outline ?? []}
+                outline={outline}
                 neighbours={neighbours}
               />
               <div className="linkrow">
