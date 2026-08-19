@@ -1,0 +1,26 @@
+{
+  "name": "melyik-zona",
+  "version": "1.0.0",
+  "private": true,
+  "description": "GPS-alapú parkolási zóna felismerő — egy gomb, és megmondja, melyik zónában állsz.",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "test": "tsc lib/geo.ts lib/zone.ts lib/overpass.ts --outDir .test-build --module commonjs --moduleResolution node --target es2022 --skipLibCheck --esModuleInterop --strict && node tests/lookup.test.cjs"
+  },
+  "dependencies": {
+    "leaflet": "1.9.4",
+    "next": "16.3.1",
+    "react": "19.2.0",
+    "react-dom": "19.2.0"
+  },
+  "devDependencies": {
+    "@types/leaflet": "1.9.20",
+    "@types/node": "22.10.5",
+    "@types/react": "19.2.0",
+    "@types/react-dom": "19.2.0",
+    "typescript": "5.7.3"
+  }
+}
