@@ -95,7 +95,8 @@ for (const point of points) {
         pad(v ? SOURCE_LABEL[v.source] ?? v.source : "HIBA", 11),
         pad(v?.code ?? "—", 8),
         pad(v?.paid ?? "—", 8),
-        pad(v?.hoursExpression ?? "—", 22),
+        pad(v?.hoursExpression ?? "—", 20),
+        pad(result.streetName ?? "—", 22),
         pad(result.district ?? result.city ?? "—", 16),
         `${result.ms} ms`,
       ].join(" "),
@@ -116,6 +117,12 @@ const expectedPaidGotPaid = expectedPaid.filter((r) => r.verdict?.paid === "paid
 const controls = results.filter((r) => r.point.expectation === "free");
 const controlsWronglyPaid = controls.filter((r) => r.verdict?.paid === "paid");
 
+// A lánc másik fele: az utcajegyzék-réteg csak akkor tud működni, ha a
+// koordinátából egyáltalán kijön utcanév és kerület. Ezt külön mérjük, mert
+// ez az OSM-en múlik, ami utcanevekre lényegében teljes.
+const withStreet = answered.filter((r) => r.streetName);
+const withArea = answered.filter((r) => r.district || r.city);
+
 const summary = {
   base,
   total: results.length,
@@ -128,6 +135,8 @@ const summary = {
   expectedPaidGotCode: expectedPaidGotCode.length,
   controls: controls.length,
   controlsWronglyPaid: controlsWronglyPaid.length,
+  withStreet: withStreet.length,
+  withArea: withArea.length,
 };
 
 if (options.json) {
@@ -145,12 +154,25 @@ if (options.json) {
   console.log(`    ebből kódot is adtunk:         ${summary.expectedPaidGotCode}`);
   console.log(`  kontrollpont (nem fizetős):      ${summary.controls}`);
   console.log(`    tévesen fizetősnek jelölve:    ${summary.controlsWronglyPaid}`);
+  console.log("");
+  console.log("  A lánc másik fele (az utcajegyzékhez ez kell):");
+  console.log(`    utcanév megvan:                ${summary.withStreet}/${summary.answered}`);
+  console.log(`    kerület/település megvan:      ${summary.withArea}/${summary.answered}`);
   console.log("─".repeat(78));
 
   if (summary.withCode === 0) {
     console.log("\nÍTÉLET: a rendszer EGYETLEN pontra sem tud zónakódot mondani.");
-    console.log("Ez azt jelenti, hogy a nyílt térképadat nem elég — be kell tölteni");
-    console.log("a hivatalos zónakészletet:  node scripts/import-zones.mjs <fájl.geojson>");
+    console.log("A nyílt térképadat tehát nem elég a zónakódhoz.");
+    if (summary.answered > 0 && summary.withStreet >= summary.answered * 0.8) {
+      console.log("");
+      console.log("JÓ HÍR: az utcanév és a kerület a pontok többségén megvan, vagyis");
+      console.log("a lánc GPS-oldali fele működik. Elég egy hivatalos UTCAJEGYZÉKET");
+      console.log("betölteni, zóna-poligon nem is kell hozzá:");
+      console.log("  node scripts/import-street-zones.mjs <utcajegyzek.csv> --source \"...\"");
+    } else {
+      console.log("Töltsd be a hivatalos zónakészletet:");
+      console.log("  node scripts/import-zones.mjs <fajl.geojson> --source \"...\"");
+    }
   } else if (summary.expectedPaidGotCode < summary.expectedPaid) {
     console.log(
       `\nÍTÉLET: részleges lefedettség — ${summary.expectedPaidGotCode}/${summary.expectedPaid} ponton van zónakód.`,

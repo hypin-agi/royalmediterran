@@ -161,6 +161,9 @@ export default function DiagnosticsView() {
   );
   const controls = done.filter((row) => row.point.expectation === "free");
   const controlsWrong = controls.filter((row) => row.verdict?.paid === "paid");
+  // A lánc GPS-oldali fele: utcanév + kerület. Az utcajegyzék-réteg ezen áll.
+  const withStreet = done.filter((row) => row.streetName);
+  const withArea = done.filter((row) => row.district || row.city);
 
   const report = useCallback(() => {
     const lines = [
@@ -191,6 +194,7 @@ export default function DiagnosticsView() {
       ),
       ``,
       `Zónakódot kapott: ${withCode.length}/${done.length}`,
+      `Utcanév megvan: ${withStreet.length}/${done.length} · kerület/település: ${withArea.length}/${done.length}`,
       `Várhatóan fizetős pontok: ${expectedPaidDone.length}, ebből fizetősnek felismert: ${expectedPaidRecognised.length}, kóddal: ${expectedPaidWithCode.length}`,
       `Kontrollpont tévesen fizetős: ${controlsWrong.length}/${controls.length}`,
     ];
@@ -199,6 +203,8 @@ export default function DiagnosticsView() {
     done,
     status,
     withCode.length,
+    withStreet.length,
+    withArea.length,
     expectedPaidDone.length,
     expectedPaidRecognised.length,
     expectedPaidWithCode.length,
@@ -308,15 +314,34 @@ export default function DiagnosticsView() {
                 </div>
                 <div className="t">kontrollpont tévesen fizetős</div>
               </div>
+              <div className="stat">
+                <div className="n">
+                  {withStreet.length}/{done.length}
+                </div>
+                <div className="t">utcanév megvan (ez kell az utcajegyzékhez)</div>
+              </div>
+              <div className="stat">
+                <div className="n">
+                  {withArea.length}/{done.length}
+                </div>
+                <div className="t">kerület vagy település megvan</div>
+              </div>
             </div>
 
             {withCode.length === 0 && (
               <div className="note warn">
                 <strong>Egyetlen ponton sem tudtunk zónakódot mondani.</strong>{" "}
                 Ez nem szoftverhiba: a nyílt térképadat nem tartalmazza a magyar
-                zónakódokat. Ilyenkor az oldal fő ígérete csak hivatalos
-                zónakészlet betöltésével teljesíthető — a mérés pont ezt
-                bizonyítja.
+                zónakódokat.
+                {withStreet.length >= done.length * 0.8 && (
+                  <>
+                    {" "}
+                    Az utcanév és a kerület viszont a pontok többségén megvan —
+                    vagyis a lánc GPS-oldali fele működik. Ehhez már elég egy
+                    hivatalos <strong>utcajegyzéket</strong> betölteni,
+                    zóna-poligon nem is kell hozzá.
+                  </>
+                )}
               </div>
             )}
           </>
