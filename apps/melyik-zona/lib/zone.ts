@@ -6,6 +6,13 @@ import {
   type Ring,
 } from "./geo";
 import type { OverpassElement, OverpassResponse } from "./overpass";
+import {
+  parseStreetParking,
+  summariseStreet,
+  type StreetParkingInfo,
+  type StreetVerdict,
+} from "./streetParking";
+import { haversineMeters } from "./geo";
 
 export type ZoneMatch = {
   osmType: "way" | "relation" | "area";
@@ -32,19 +39,48 @@ export type ZoneMatch = {
 
 export type AdminArea = { name: string; adminLevel: number | null };
 
-export type StreetInfo = {
-  name: string;
+export type StreetLayer = StreetParkingInfo & { verdict: StreetVerdict };
+
+export type ParkingLot = {
+  osmType: "way" | "relation";
+  osmId: number;
+  osmUrl: string;
+  name: string | null;
+  fee: string | null;
+  charge: string | null;
+  openingHours: string | null;
+  maxstay: string | null;
   distanceMeters: number | null;
-  /** Az útra közvetlenül rögzített parkolási tagek (`parking:*`, `zone:*`). */
-  parkingTags: Record<string, string>;
+};
+
+/** Mennyire bízhat a felhasználó a válaszban. */
+export type Confidence = "high" | "medium" | "low";
+
+export type Verdict = {
+  /** `paid` = fizetős szakasz, `free` = az adat szerint nem fizetős. */
+  paid: "paid" | "free" | "unknown";
+  /** Melyik rétegből jött a válasz. */
+  source: "zone" | "street" | "lot" | "none";
+  /** A zónakód, ha bármelyik réteg tudja. */
+  code: string | null;
+  confidence: Confidence;
+  /** Kiértékelhető `opening_hours` kifejezés, ha van. */
+  hoursExpression: string | null;
+  charge: string | null;
+  maxstay: string | null;
+  /** Emberi nyelvű indoklás, mire alapoztuk a választ. */
+  evidence: string[];
 };
 
 export type ZoneLookup = {
   point: LatLon;
+  verdict: Verdict;
   zones: ZoneMatch[];
   nearbyZones: ZoneMatch[];
-  street: StreetInfo | null;
-  streets: StreetInfo[];
+  /** A legközelebbi úttest neve — akkor is, ha nincs rajta parkolási adat. */
+  streetName: string | null;
+  streets: StreetLayer[];
+  lots: ParkingLot[];
   admin: { city: string | null; district: string | null; areas: AdminArea[] };
 };
 
@@ -198,16 +234,149 @@ function mergeById(matches: ZoneMatch[]): ZoneMatch[] {
   return [...byKey.values()];
 }
 
-const PARKING_TAG_PREFIXES = ["parking", "zone", "fee", "maxstay"];
+const HIGHWAY_BLOCKLIST = new Set([
+  "footway",
+  "path",
+  "steps",
+  "cycleway",
+  "pedestrian",
+  "construction",
+  "proposed",
+  "platform",
+  "corridor",
+]);
 
-function parkingTagsOf(tags: Record<string, string>): Record<string, string> {
-  return Object.fromEntries(
-    Object.entries(tags).filter(([key]) =>
-      PARKING_TAG_PREFIXES.some(
-        (prefix) => key === prefix || key.startsWith(`${prefix}:`),
-      ),
-    ),
-  );
+function distanceOfWay(element: OverpassElement, point: LatLon): number | null {
+  const geometry = (element.geometry ?? []).map((p) => ({
+    lat: p.lat,
+    lon: p.lon,
+  }));
+  if (geometry.length === 0) return null;
+  return Math.round(distanceToRings(point, [geometry]));
+}
+
+function toParkingLot(
+  element: OverpassElement,
+  point: LatLon,
+): ParkingLot | null {
+  const tags = element.tags ?? {};
+  const center = element.center;
+  const osmType = element.type === "relation" ? "relation" : "way";
+
+  return {
+    osmType,
+    osmId: element.id,
+    osmUrl: `${OSM_ELEMENT_BASE[osmType]}${element.id}`,
+    name: tags.name ?? null,
+    fee: tags.fee ?? null,
+    charge: tags.charge ?? null,
+    openingHours: tags.opening_hours ?? null,
+    maxstay: tags.maxstay ?? null,
+    distanceMeters: center
+      ? Math.round(haversineMeters(point, { lat: center.lat, lon: center.lon }))
+      : null,
+  };
+}
+
+/**
+ * A rétegek összegzése egyetlen válasszá.
+ *
+ * Sorrend: a zóna-poligon a legerősebb bizonyíték (onnan jön kód is), utána az
+ * úttestre tagelt adat, végül a közeli fizetős parkoló. Ha egyik réteg sem tud
+ * semmit, azt `unknown`-ként mondjuk ki — nem írjuk rá, hogy ingyenes.
+ */
+function buildVerdict(
+  zones: ZoneMatch[],
+  streets: StreetLayer[],
+  lots: ParkingLot[],
+): Verdict {
+  const zone = zones[0];
+  if (zone) {
+    const paidByTag = zone.fee === "no" ? "free" : "paid";
+    return {
+      paid: paidByTag,
+      source: "zone",
+      code: zone.code,
+      confidence: zone.code ? "high" : "medium",
+      hoursExpression: zone.openingHours,
+      charge: zone.charge,
+      maxstay: zone.maxstay,
+      evidence: [
+        zone.name
+          ? `A pont a(z) „${zone.name}” parkolási zóna poligonján belül van.`
+          : "A pont egy parkolási zóna poligonján belül van.",
+      ],
+    };
+  }
+
+  const paidStreet = streets.find((street) => street.verdict.paid === true);
+  if (paidStreet) {
+    const { verdict } = paidStreet;
+    return {
+      paid: "paid",
+      source: "street",
+      code: verdict.zoneCode,
+      confidence: verdict.zoneCode ? "medium" : "low",
+      hoursExpression: verdict.hoursExpression,
+      charge: verdict.charge,
+      maxstay: verdict.maxstay,
+      evidence: [
+        paidStreet.name
+          ? `${paidStreet.name}: az úttest adata szerint fizetős a várakozás.`
+          : "A legközelebbi úttest adata szerint fizetős a várakozás.",
+        ...verdict.evidence,
+      ],
+    };
+  }
+
+  const freeStreet = streets.find((street) => street.verdict.paid === false);
+  if (freeStreet) {
+    return {
+      paid: "free",
+      source: "street",
+      code: null,
+      confidence: "low",
+      hoursExpression: freeStreet.verdict.hoursExpression,
+      charge: null,
+      maxstay: freeStreet.verdict.maxstay,
+      evidence: [
+        freeStreet.name
+          ? `${freeStreet.name}: az úttest adata szerint nem fizetős a várakozás.`
+          : "A legközelebbi úttest adata szerint nem fizetős a várakozás.",
+      ],
+    };
+  }
+
+  const paidLot = lots.find((lot) => lot.fee === "yes");
+  if (paidLot) {
+    return {
+      paid: "unknown",
+      source: "lot",
+      code: null,
+      confidence: "low",
+      hoursExpression: paidLot.openingHours,
+      charge: paidLot.charge,
+      maxstay: paidLot.maxstay,
+      evidence: [
+        `${paidLot.distanceMeters ?? "?"} méterre van egy fizetős parkoló${
+          paidLot.name ? ` (${paidLot.name})` : ""
+        } — az utcai várakozásról viszont nincs adat.`,
+      ],
+    };
+  }
+
+  return {
+    paid: "unknown",
+    source: "none",
+    code: null,
+    confidence: "low",
+    hoursExpression: null,
+    charge: null,
+    maxstay: null,
+    evidence: [
+      "Erre a pontra nincs parkolási adat az OpenStreetMapben — sem zónahatár, sem az úttestre tagelt információ.",
+    ],
+  };
 }
 
 export function parseLookup(
@@ -243,7 +412,7 @@ export function parseLookup(
 
   const zones = candidates
     .filter((z) => z.containsPoint)
-    .sort((a, b) => (a.outline.length ? 0 : 1) - (b.outline.length ? 0 : 1));
+    .sort((a, b) => (a.code ? 0 : 1) - (b.code ? 0 : 1));
 
   const nearbyZones = candidates
     .filter((z) => !z.containsPoint)
@@ -254,38 +423,51 @@ export function parseLookup(
     )
     .slice(0, 5);
 
-  const streets: StreetInfo[] = ways
-    .filter((w) => w.tags?.highway && w.tags?.name)
+  // --- Úttest-réteg ---
+  const highwayWays = ways.filter((w) => {
+    const highway = w.tags?.highway;
+    if (!highway || HIGHWAY_BLOCKLIST.has(highway)) return false;
+    return !isParkingZone(w) && w.tags?.amenity !== "parking";
+  });
+
+  const streets: StreetLayer[] = highwayWays
     .map((w) => {
-      const geometry = (w.geometry ?? []).map((p) => ({ lat: p.lat, lon: p.lon }));
-      return {
-        name: w.tags!.name,
-        distanceMeters: geometry.length
-          ? Math.round(distanceToRings(point, [geometry]))
-          : null,
-        parkingTags: parkingTagsOf(w.tags ?? {}),
-      };
+      const info = parseStreetParking(w.tags ?? {}, {
+        osmId: w.id,
+        distanceMeters: distanceOfWay(w, point) ?? Number.MAX_SAFE_INTEGER,
+      });
+      return { ...info, verdict: summariseStreet(info) };
     })
+    .sort((a, b) => a.distanceMeters - b.distanceMeters);
+
+  // Csak azokat tartjuk meg, amikről mondanak is valamit — a puszta utcanév
+  // külön mezőben megy, hogy ne tűnjön adatnak.
+  const informative = streets.filter(
+    (street) => street.sides.length > 0 || street.verdict.paid !== null,
+  );
+
+  const streetName = streets.find((street) => street.name)?.name ?? null;
+
+  // --- Parkoló-réteg ---
+  const lots = [...ways, ...relations]
+    .filter((e) => e.tags?.amenity === "parking")
+    .map((e) => toParkingLot(e, point))
+    .filter((lot): lot is ParkingLot => lot !== null)
     .sort(
       (a, b) =>
         (a.distanceMeters ?? Number.MAX_SAFE_INTEGER) -
         (b.distanceMeters ?? Number.MAX_SAFE_INTEGER),
-    );
-
-  // Azonos nevű utak összevonása (egy utca több way-ből áll).
-  const seenStreets = new Set<string>();
-  const uniqueStreets = streets.filter((s) => {
-    if (seenStreets.has(s.name)) return false;
-    seenStreets.add(s.name);
-    return true;
-  });
+    )
+    .slice(0, 4);
 
   return {
     point,
+    verdict: buildVerdict(zones, informative, lots),
     zones,
     nearbyZones,
-    street: uniqueStreets[0] ?? null,
-    streets: uniqueStreets.slice(0, 4),
+    streetName,
+    streets: informative.slice(0, 4),
+    lots,
     admin: { city, district, areas: adminAreas },
   };
 }

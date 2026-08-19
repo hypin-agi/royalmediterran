@@ -56,7 +56,7 @@ export default function ZoneMap({
             if (ring.length < 3) continue;
             const polygon = L.polygon(
               ring.map((p) => [p.lat, p.lon] as [number, number]),
-              { color: "#8b949e", weight: 1, fillOpacity: 0.06, dashArray: "4 4" },
+              { color: "#8b95a6", weight: 1, fillOpacity: 0.05, dashArray: "5 5" },
             ).addTo(map);
             if (neighbour.label) polygon.bindTooltip(neighbour.label);
           }
@@ -66,7 +66,7 @@ export default function ZoneMap({
           if (ring.length < 3) continue;
           const polygon = L.polygon(
             ring.map((p) => [p.lat, p.lon] as [number, number]),
-            { color: "#3fb950", weight: 2, fillOpacity: 0.18 },
+            { color: "#0b4fd6", weight: 3, fillOpacity: 0.14 },
           ).addTo(map);
           layers.push(polygon);
         }
@@ -74,17 +74,18 @@ export default function ZoneMap({
         if (accuracyMeters && accuracyMeters > 0) {
           L.circle([point.lat, point.lon], {
             radius: accuracyMeters,
-            color: "#58a6ff",
+            color: "#0b4fd6",
             weight: 1,
-            fillOpacity: 0.12,
+            opacity: 0.45,
+            fillOpacity: 0.08,
           }).addTo(map);
         }
 
         L.circleMarker([point.lat, point.lon], {
-          radius: 7,
+          radius: 8,
           color: "#ffffff",
-          weight: 2,
-          fillColor: "#58a6ff",
+          weight: 3,
+          fillColor: "#0b4fd6",
           fillOpacity: 1,
         })
           .addTo(map)

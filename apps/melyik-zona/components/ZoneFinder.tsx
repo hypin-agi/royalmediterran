@@ -2,6 +2,7 @@
 
 import dynamic from "next/dynamic";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { evaluateHours, huWeekdayName, type HoursVerdict } from "@/lib/openingHours";
 
 const ZoneMap = dynamic(() => import("./ZoneMap"), { ssr: false });
 
@@ -21,35 +22,69 @@ type ZoneMatch = {
   maxstay: string | null;
   operator: string | null;
   website: string | null;
-  tags: Record<string, string>;
   outline: LatLon[][];
 };
 
-type StreetInfo = {
-  name: string;
+type ParkingSide = {
+  label: string;
+  placement: string | null;
+  fee: string | null;
+  restriction: string | null;
+  zone: string | null;
+  maxstay: string | null;
+  interval: string | null;
+};
+
+type StreetLayer = {
+  osmId: number;
+  osmUrl: string;
+  name: string | null;
+  distanceMeters: number;
+  sides: ParkingSide[];
+  rawTags: Record<string, string>;
+  verdict: {
+    paid: boolean | null;
+    evidence: string[];
+    hoursExpression: string | null;
+    zoneCode: string | null;
+    charge: string | null;
+    maxstay: string | null;
+  };
+};
+
+type ParkingLot = {
+  osmUrl: string;
+  name: string | null;
+  fee: string | null;
+  charge: string | null;
   distanceMeters: number | null;
-  parkingTags: Record<string, string>;
+};
+
+type Verdict = {
+  paid: "paid" | "free" | "unknown";
+  source: "zone" | "street" | "lot" | "none";
+  code: string | null;
+  confidence: "high" | "medium" | "low";
+  hoursExpression: string | null;
+  charge: string | null;
+  maxstay: string | null;
+  evidence: string[];
 };
 
 type ZoneResponse = {
   point: LatLon;
+  verdict: Verdict;
   zones: ZoneMatch[];
   nearbyZones: ZoneMatch[];
-  street: StreetInfo | null;
-  streets: StreetInfo[];
-  admin: {
-    city: string | null;
-    district: string | null;
-    areas: { name: string; adminLevel: number | null }[];
-  };
-  cached?: boolean;
-  attribution?: string;
+  streetName: string | null;
+  streets: StreetLayer[];
+  lots: ParkingLot[];
+  admin: { city: string | null; district: string | null };
   error?: string;
 };
 
 type Phase = "idle" | "locating" | "looking-up" | "done" | "error";
-
-type Fix = { point: LatLon; accuracy: number | null; at: number };
+type Fix = { point: LatLon; accuracy: number | null };
 
 const GEO_OPTIONS: PositionOptions = {
   enableHighAccuracy: true,
@@ -57,17 +92,28 @@ const GEO_OPTIONS: PositionOptions = {
   maximumAge: 0,
 };
 
-/** 40 méter fölött már reális, hogy a szomszédos zónát mutatjuk. */
 const ACCURACY_WARN_M = 40;
-/** Ha a zónahatár ilyen közel van, érdemes szólni a felhasználónak. */
 const BORDER_WARN_M = 25;
+
+const CONFIDENCE_LABEL: Record<Verdict["confidence"], string> = {
+  high: "megbízható",
+  medium: "közepes",
+  low: "gyenge",
+};
+
+const SOURCE_LABEL: Record<Verdict["source"], string> = {
+  zone: "zónahatár a térképadatból",
+  street: "az úttestre rögzített adat",
+  lot: "közeli parkoló adata",
+  none: "nincs adat",
+};
 
 function geolocationMessage(error: GeolocationPositionError): string {
   switch (error.code) {
     case error.PERMISSION_DENIED:
       return "Nem engedélyezted a helymeghatározást. Engedélyezd a böngésző címsorában (lakat ikon → Helyzet), majd nyomd meg újra a gombot.";
     case error.POSITION_UNAVAILABLE:
-      return "A készülék most nem tudja megállapítani a pozíciót. Menj ki a szabadba vagy az ablak közelébe, és próbáld újra.";
+      return "A készülék most nem tudja megállapítani a pozíciót. Állj közelebb az ablakhoz vagy menj ki a szabadba, és próbáld újra.";
     case error.TIMEOUT:
       return "Túl sokáig tartott a helymeghatározás. Próbáld újra.";
     default:
@@ -85,11 +131,79 @@ function getCurrentPosition(): Promise<GeolocationPosition> {
   });
 }
 
-function formatFee(value: string | null): string | null {
-  if (!value) return null;
-  if (value === "yes") return "Igen, fizetős";
-  if (value === "no") return "Nem, ingyenes";
-  return value;
+type Banner = {
+  tone: "is-paid" | "is-free" | "is-unknown";
+  title: string;
+  detail: string;
+};
+
+/**
+ * A verdikt és az idősáv összegyúrása egyetlen mondattá. Ez az, amit a
+ * felhasználó két másodperc alatt elolvas az autóban, ezért itt nem
+ * kertelünk, de nem is állítunk többet, mint amennyit az adat bír.
+ */
+function buildBanner(verdict: Verdict, hours: HoursVerdict): Banner {
+  const dayNote = hours.isPublicHoliday
+    ? "Ma munkaszüneti nap."
+    : hours.weekday >= 5
+      ? `Ma ${huWeekdayName(hours.weekday)}.`
+      : "";
+
+  if (verdict.paid === "paid") {
+    if (hours.supported && hours.activeNow === true) {
+      return {
+        tone: "is-paid",
+        title: "Most fizetős",
+        detail: hours.nextChange
+          ? `A díjfizetési kötelezettség ma ${hours.nextChange}-kor ér véget.`
+          : "A díjfizetési kötelezettség jelenleg él.",
+      };
+    }
+    if (hours.supported && hours.activeNow === false) {
+      return {
+        tone: "is-free",
+        title: "Most ingyenes",
+        detail: [
+          dayNote,
+          hours.nextChange
+            ? `Fizetőssé ma ${hours.nextChange}-kor válik.`
+            : "Ma már nem válik fizetőssé.",
+          "Fizetős zónában állsz, csak épp az időszakon kívül.",
+        ]
+          .filter(Boolean)
+          .join(" "),
+      };
+    }
+    if (hours.isPublicHoliday || hours.weekday >= 5) {
+      return {
+        tone: "is-unknown",
+        title: "Fizetős zóna — de ma valószínűleg nem kell fizetni",
+        detail: `${dayNote} A fizetős időszakot a térképadat nem tartalmazza, viszont a magyar városok többségében hétvégén és munkaszüneti napon ingyenes a várakozás. Ellenőrizd a táblát.`,
+      };
+    }
+    return {
+      tone: "is-paid",
+      title: "Fizetős zóna",
+      detail:
+        "A fizetős időszakot a térképadat nem tartalmazza, ezért nem tudjuk megmondani, hogy épp most kell-e fizetni. Nézd meg a táblát.",
+    };
+  }
+
+  if (verdict.paid === "free") {
+    return {
+      tone: "is-free",
+      title: "Az adat szerint nem fizetős",
+      detail:
+        "A legközelebbi úttest adata szerint itt nincs díjfizetési kötelezettség. Ez gyenge bizonyíték — ha van tábla, az számít.",
+    };
+  }
+
+  return {
+    tone: "is-unknown",
+    title: "Nem tudjuk megállapítani",
+    detail:
+      "Erre a pontra nincs parkolási adat az OpenStreetMapben. A pozíciód és az utcanév alatt megvan — a hivatalos zónatérképen ellenőrizheted.",
+  };
 }
 
 export default function ZoneFinder() {
@@ -98,6 +212,13 @@ export default function ZoneFinder() {
   const [data, setData] = useState<ZoneResponse | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const [tick, setTick] = useState(0);
+
+  // Percenként újraértékeljük az idősávot, hogy a "most fizetős" ne álljon meg.
+  useEffect(() => {
+    const timer = window.setInterval(() => setTick((t) => t + 1), 60_000);
+    return () => window.clearInterval(timer);
+  }, []);
 
   const lookup = useCallback(async (point: LatLon, accuracy: number | null) => {
     setPhase("looking-up");
@@ -108,19 +229,18 @@ export default function ZoneFinder() {
         { headers: { Accept: "application/json" } },
       );
       const json = (await response.json()) as ZoneResponse;
+      setFix({ point, accuracy });
       if (!response.ok) {
         setPhase("error");
         setMessage(json.error ?? "A zóna lekérdezése nem sikerült.");
-        setFix({ point, accuracy, at: Date.now() });
         return;
       }
       setData(json);
-      setFix({ point, accuracy, at: Date.now() });
       setPhase("done");
       setMessage(null);
     } catch {
+      setFix({ point, accuracy });
       setPhase("error");
-      setFix({ point, accuracy, at: Date.now() });
       setMessage(
         "Nem sikerült elérni a szervert. Ellenőrizd az internetkapcsolatot, és próbáld újra.",
       );
@@ -134,11 +254,10 @@ export default function ZoneFinder() {
     setMessage("GPS-pozíció kérése…");
     try {
       const position = await getCurrentPosition();
-      const point = {
-        lat: position.coords.latitude,
-        lon: position.coords.longitude,
-      };
-      await lookup(point, position.coords.accuracy ?? null);
+      await lookup(
+        { lat: position.coords.latitude, lon: position.coords.longitude },
+        position.coords.accuracy ?? null,
+      );
     } catch (error) {
       setPhase("error");
       setMessage(
@@ -161,9 +280,21 @@ export default function ZoneFinder() {
     }
   }, [lookup]);
 
-  const primary = data?.zones?.[0] ?? null;
-  const busy = phase === "locating" || phase === "looking-up";
+  const verdict = data?.verdict ?? null;
 
+  const hours = useMemo(
+    () => evaluateHours(verdict?.hoursExpression ?? null),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [verdict?.hoursExpression, tick],
+  );
+
+  const banner = useMemo(
+    () => (verdict ? buildBanner(verdict, hours) : null),
+    [verdict, hours],
+  );
+
+  const primaryZone = data?.zones?.[0] ?? null;
+  const outline = useMemo(() => primaryZone?.outline ?? [], [primaryZone]);
   const neighbours = useMemo(
     () =>
       (data?.nearbyZones ?? [])
@@ -173,161 +304,183 @@ export default function ZoneFinder() {
     [data],
   );
 
-  // Stabil referencia kell, különben a térkép minden renderben újraépülne.
-  const outline = useMemo(() => primary?.outline ?? [], [primary]);
+  const busy = phase === "locating" || phase === "looking-up";
 
   const copyCode = useCallback(async (code: string) => {
     try {
       await navigator.clipboard.writeText(code);
       setCopied(true);
-      window.setTimeout(() => setCopied(false), 2000);
+      window.setTimeout(() => setCopied(false), 2200);
     } catch {
       setCopied(false);
     }
   }, []);
 
-  const place = [data?.admin.district, data?.admin.city]
-    .filter(Boolean)
-    .join(", ");
+  const place = [data?.admin.district, data?.admin.city].filter(Boolean).join(", ");
 
   return (
     <>
-      <button className="locate" onClick={run} disabled={busy}>
+      <button className="locate" onClick={run} disabled={busy} type="button">
         {busy ? <span className="spinner" aria-hidden /> : <span aria-hidden>📍</span>}
         {busy ? "Keresés…" : "Melyik zónában állok?"}
       </button>
 
-      {message && (
-        <p className={phase === "error" ? "note bad" : "status"}>{message}</p>
+      {phase === "idle" && (
+        <p className="hint">
+          A böngésző egyszer rákérdez a helyadatra. Semmit nem telepítesz,
+          nem regisztrálsz.
+        </p>
       )}
 
-      {phase === "done" && data && (
+      {message && (
+        <div className={phase === "error" ? "note bad" : "hint"}>{message}</div>
+      )}
+
+      {phase === "done" && data && verdict && banner && (
         <>
-          {primary ? (
-            <section className="card">
-              <h2>A zónád</h2>
-              <div className="zone-code">
-                <strong>{primary.code ?? "—"}</strong>
-                {primary.code && (
-                  <button className="copy" onClick={() => copyCode(primary.code!)}>
-                    {copied ? "✓ Másolva" : "Kód másolása"}
-                  </button>
-                )}
-              </div>
-              {primary.name && <p className="zone-name">{primary.name}</p>}
-              {!primary.code && (
-                <div className="note warn">
-                  A térképadat ismeri a zóna határát, de zónakódot nem tárol hozzá.
-                  A kódot a parkolóautomatán vagy a zónatáblán találod.
-                </div>
-              )}
+          <section className="card">
+            <div className={`statusbar ${banner.tone}`}>
+              <span className="dot" aria-hidden />
+              <span>
+                {banner.title}
+                <small>{banner.detail}</small>
+              </span>
+            </div>
 
-              <div className="chips">
-                {place && (
-                  <span className="chip">
-                    Hely: <strong>{place}</strong>
-                  </span>
-                )}
-                {data.street && (
-                  <span className="chip">
-                    Utca: <strong>{data.street.name}</strong>
-                  </span>
-                )}
-                {fix?.accuracy != null && (
-                  <span className="chip">
-                    GPS-pontosság: <strong>±{Math.round(fix.accuracy)} m</strong>
-                  </span>
-                )}
-              </div>
-
-              <dl className="facts">
-                {formatFee(primary.fee) && (
-                  <>
-                    <dt>Fizetős</dt>
-                    <dd>{formatFee(primary.fee)}</dd>
-                  </>
-                )}
-                {primary.charge && (
-                  <>
-                    <dt>Díj</dt>
-                    <dd>{primary.charge}</dd>
-                  </>
-                )}
-                {primary.openingHours && (
-                  <>
-                    <dt>Fizetős időszak</dt>
-                    <dd>
-                      <code>{primary.openingHours}</code>
-                    </dd>
-                  </>
-                )}
-                {primary.maxstay && (
-                  <>
-                    <dt>Max. várakozás</dt>
-                    <dd>{primary.maxstay}</dd>
-                  </>
-                )}
-                {primary.operator && (
-                  <>
-                    <dt>Üzemeltető</dt>
-                    <dd>{primary.operator}</dd>
-                  </>
-                )}
-              </dl>
-
-              {fix?.accuracy != null && fix.accuracy > ACCURACY_WARN_M && (
-                <div className="note warn">
-                  A GPS pontossága most ±{Math.round(fix.accuracy)} méter. Ekkora
-                  hibahatárnál előfordulhat, hogy a szomszédos zónát mutatjuk —
-                  vesd össze az utcán lévő zónatáblával.
-                </div>
-              )}
-              {primary.distanceMeters != null &&
-                primary.distanceMeters < BORDER_WARN_M && (
-                  <div className="note warn">
-                    Zónahatár közelében állsz (kb. {primary.distanceMeters} m).
-                    Nézd meg a lenti szomszédos zónákat is.
+            <div className="codeblock">
+              <div>
+                <div className="label">Zónakód</div>
+                {verdict.code ? (
+                  <div className="value">{verdict.code}</div>
+                ) : (
+                  <div className="value missing">
+                    nincs az adatban
                   </div>
                 )}
-            </section>
-          ) : (
-            <section className="card">
-              <h2>Nincs zónatalálat</h2>
-              <p style={{ margin: 0, lineHeight: 1.55 }}>
-                Ezen a ponton nem találtunk fizetős parkolási zónát az
-                OpenStreetMap adataiban. Ez kétfélét jelenthet: vagy tényleg
-                ingyenes a parkolás itt, vagy a zóna még nincs feltérképezve.
-                Mindenképp nézd meg az utcai táblát.
-              </p>
-              <div className="chips">
-                {place && (
-                  <span className="chip">
-                    Hely: <strong>{place}</strong>
-                  </span>
-                )}
-                {data.street && (
-                  <span className="chip">
-                    Utca: <strong>{data.street.name}</strong>
-                  </span>
-                )}
               </div>
-              {data.street && Object.keys(data.street.parkingTags).length > 0 && (
+              {verdict.code && (
+                <button
+                  className={copied ? "copy done" : "copy"}
+                  onClick={() => copyCode(verdict.code!)}
+                  type="button"
+                >
+                  {copied ? "✓ Másolva" : "Kód másolása"}
+                </button>
+              )}
+            </div>
+
+            {!verdict.code && verdict.paid === "paid" && (
+              <div className="note warn">
+                A hely fizetős, de a zónakódot a térképadat nem tartalmazza. A
+                kód az utcai zónatáblán és a parkolóautomatán van kiírva — és
+                lent a hivatalos zónatérképen is megnézheted.
+              </div>
+            )}
+
+            <div className="chips">
+              {place && (
+                <span className="chip">
+                  Hely: <strong>{place}</strong>
+                </span>
+              )}
+              {data.streetName && (
+                <span className="chip">
+                  Utca: <strong>{data.streetName}</strong>
+                </span>
+              )}
+              {fix?.accuracy != null && (
+                <span className="chip">
+                  GPS: <strong>±{Math.round(fix.accuracy)} m</strong>
+                </span>
+              )}
+              <span className={`badge ${verdict.confidence}`}>
+                {CONFIDENCE_LABEL[verdict.confidence]}
+              </span>
+            </div>
+
+            <dl className="facts">
+              {hours.supported && hours.todayRanges.length > 0 && (
                 <>
-                  <p className="zone-name">Amit az utcáról tudunk</p>
-                  <dl className="facts">
-                    {Object.entries(data.street.parkingTags).map(([key, value]) => (
-                      <div key={key} style={{ display: "contents" }}>
-                        <dt>
-                          <code>{key}</code>
-                        </dt>
-                        <dd>{value}</dd>
-                      </div>
-                    ))}
-                  </dl>
+                  <dt>Ma fizetős</dt>
+                  <dd>{hours.todayRanges.join(", ")}</dd>
                 </>
               )}
-            </section>
-          )}
+              {verdict.hoursExpression && (
+                <>
+                  <dt>Időszak (nyers)</dt>
+                  <dd>
+                    <code>{verdict.hoursExpression}</code>
+                    {!hours.supported && " — ezt a kifejezést nem tudtuk értelmezni"}
+                  </dd>
+                </>
+              )}
+              {verdict.charge && (
+                <>
+                  <dt>Díj</dt>
+                  <dd>{verdict.charge}</dd>
+                </>
+              )}
+              {verdict.maxstay && (
+                <>
+                  <dt>Max. várakozás</dt>
+                  <dd>{verdict.maxstay}</dd>
+                </>
+              )}
+              {primaryZone?.operator && (
+                <>
+                  <dt>Üzemeltető</dt>
+                  <dd>{primaryZone.operator}</dd>
+                </>
+              )}
+              <>
+                <dt>Forrás</dt>
+                <dd>{SOURCE_LABEL[verdict.source]}</dd>
+              </>
+            </dl>
+
+            {fix?.accuracy != null && fix.accuracy > ACCURACY_WARN_M && (
+              <div className="note warn">
+                A GPS pontossága most ±{Math.round(fix.accuracy)} méter. Ekkora
+                hibahatárnál előfordulhat, hogy a szomszédos zónát mutatjuk.
+              </div>
+            )}
+            {primaryZone?.distanceMeters != null &&
+              primaryZone.distanceMeters < BORDER_WARN_M && (
+                <div className="note warn">
+                  Zónahatár közelében állsz (kb. {primaryZone.distanceMeters} m).
+                  Nézd meg a szomszédos zónákat is.
+                </div>
+              )}
+
+            <details className="raw" style={{ marginTop: 16 }}>
+              <summary>Miből következtettünk erre?</summary>
+              <ul className="reasons">
+                {verdict.evidence.map((line, index) => (
+                  <li key={index}>{line}</li>
+                ))}
+              </ul>
+              {data.streets.length > 0 && (
+                <ul className="reasons">
+                  {data.streets.map((street) =>
+                    street.sides.map((side, index) => (
+                      <li key={`${street.osmId}-${index}`}>
+                        {street.name ?? "névtelen út"} · {side.label}:{" "}
+                        {[
+                          side.placement,
+                          side.fee ? `fee=${side.fee}` : null,
+                          side.restriction,
+                          side.zone ? `zóna ${side.zone}` : null,
+                          side.interval,
+                        ]
+                          .filter(Boolean)
+                          .join(", ")}
+                      </li>
+                    )),
+                  )}
+                </ul>
+              )}
+            </details>
+          </section>
 
           {fix && (
             <section className="card">
@@ -340,18 +493,18 @@ export default function ZoneFinder() {
               />
               <div className="linkrow">
                 <a
-                  href={`https://www.google.com/maps/search/?api=1&query=${fix.point.lat},${fix.point.lon}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  Megnyitás Google Maps-ben
-                </a>
-                <a
                   href="https://nemzetimobilfizetes.hu/parking_purchases/zonainfo"
                   target="_blank"
                   rel="noopener noreferrer"
                 >
                   Hivatalos zónatérkép
+                </a>
+                <a
+                  href={`https://www.google.com/maps/search/?api=1&query=${fix.point.lat},${fix.point.lon}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Pozíció a Google Mapsen
                 </a>
               </div>
             </section>
@@ -372,15 +525,31 @@ export default function ZoneFinder() {
             </section>
           )}
 
+          {data.lots.length > 0 && (
+            <section className="card">
+              <h2>Parkolók a közelben</h2>
+              <ul className="plain">
+                {data.lots.map((lot) => (
+                  <li key={lot.osmUrl}>
+                    <strong>{lot.name ?? "Parkoló"}</strong>
+                    {lot.distanceMeters != null && ` — kb. ${lot.distanceMeters} m`}
+                    {lot.fee === "yes" ? " · fizetős" : lot.fee === "no" ? " · ingyenes" : ""}
+                    {lot.charge ? ` · ${lot.charge}` : ""}
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+
           <section className="card">
-            <h2>Ellenőrzés</h2>
-            <p style={{ margin: 0, lineHeight: 1.55, fontSize: 14 }}>
-              A zónakódot mindig vesd össze az utcai táblával vagy a
-              parkolóautomatával, mielőtt elindítod a parkolást. Ez az oldal
-              nyílt térképadatból dolgozik, nem hivatalos nyilvántartásból.
+            <h2>Mielőtt elindítod a parkolást</h2>
+            <p style={{ margin: 0, fontSize: 15, color: "var(--ink-soft)" }}>
+              Vesd össze a kódot az utcai zónatáblával vagy a parkolóautomatával.
+              Ez az oldal nyílt térképadatból dolgozik, nem a szolgáltató
+              hivatalos nyilvántartásából.
             </p>
-            <details className="raw" style={{ marginTop: 12 }}>
-              <summary>Nyers adat (hibabejelentéshez)</summary>
+            <details className="raw" style={{ marginTop: 14 }}>
+              <summary>Nyers válasz (hibabejelentéshez)</summary>
               <pre>{JSON.stringify(data, null, 2)}</pre>
             </details>
           </section>

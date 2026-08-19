@@ -8,7 +8,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "test": "tsc lib/geo.ts lib/zone.ts lib/overpass.ts --outDir .test-build --module commonjs --moduleResolution node --target es2022 --skipLibCheck --esModuleInterop --strict && node tests/lookup.test.cjs"
+    "test": "tsc lib/*.ts --outDir .test-build --module commonjs --moduleResolution node --target es2022 --skipLibCheck --esModuleInterop --strict && node tests/lookup.test.cjs && node tests/hours.test.cjs"
   },
   "dependencies": {
     "leaflet": "1.9.4",

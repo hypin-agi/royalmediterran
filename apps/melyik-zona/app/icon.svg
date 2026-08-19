@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
-  <rect width="64" height="64" rx="14" fill="#0d1117"/>
-  <path d="M32 12c-7.7 0-14 6.1-14 13.6 0 9.9 12.3 24 13 24.8a1.4 1.4 0 0 0 2 0c.7-.8 13-14.9 13-24.8C46 18.1 39.7 12 32 12z" fill="#3fb950"/>
-  <text x="32" y="32" font-family="system-ui, sans-serif" font-size="18" font-weight="700" fill="#08130a" text-anchor="middle" dominant-baseline="middle">P</text>
+  <rect width="64" height="64" rx="14" fill="#0b4fd6"/>
+  <rect x="6" y="6" width="52" height="52" rx="10" fill="none" stroke="#ffffff" stroke-width="3.5"/>
+  <path d="M23 17h11.5c6.6 0 10.5 3.8 10.5 9.8S41.1 36.8 34.5 36.8H29V47h-6V17zm6 5.2v9.4h5c3.1 0 5-1.7 5-4.7s-1.9-4.7-5-4.7h-5z" fill="#ffffff"/>
 </svg>
