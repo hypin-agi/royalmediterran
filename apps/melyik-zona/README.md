@@ -23,8 +23,9 @@ egységes. Három réteget kérdezünk le egyszerre, és a legerősebb nyer:
 
 | Réteg | Mit ad | Megbízhatóság |
 |-------|--------|---------------|
-| **Zóna-poligon** (`zone=parking`) | zónakód, díj, fizetős időszak, határ a térképen | magas |
-| **Úttest-tagek** (`parking:right:fee=yes`, `parking:condition:*`) | fizetős-e a szakasz, gyakran zónakód is | közepes |
+| **Hivatalos készlet** (`data/zones.json`) | zónakód, díj, időszak, pontos határ | magas |
+| **Zóna-poligon** (`zone=parking`) | zónakód, ha az OSM tárolja | közepes |
+| **Úttest-tagek** (`parking:right:fee=yes`, `parking:condition:*`) | fizetős-e a szakasz | közepes |
 | **Közeli parkolók** (`amenity=parking`) | csak kontextus, nem verdikt | gyenge |
 
 Ez a rétegzés a lényeg: a magyar utcák nagy részén nincs zóna-poligon, viszont
@@ -50,6 +51,72 @@ mutatja. Rossz idősáv-válasz büntetést ér, ezért itt nem tippelünk.
 A `/lefedettseg` oldal egyetlen országos Overpass-lekérdezésből rajzolja meg,
 hol van egyáltalán zónaadat Magyarországon, és hol van hozzá zónakód is.
 Ez mérés, nem becslés — ezért mutat üres foltokat is.
+
+## A zónatérkép kérdése — ez dönti el a terméket
+
+Az egész oldal egyetlen dolgon áll vagy bukik: **egy GPS-koordinátáról meg
+tudjuk-e mondani, melyik parkolási zónában van, és mi a zóna kódja.**
+
+### Amit tudni kell a nyílt adatról
+
+A `zone=parking` OSM-tag elsősorban lengyel térképezési konvenció. Magyar
+területen ritkán fordul elő, és **zónakódot szinte soha nem hordoz**. Ebből
+következik, hogy pusztán az OpenStreetMapre építve a termék fő ígérete nem
+teljesíthető megbízhatóan. Ezért a rendszer négyrétegű, és a legfelső réteg
+nem az OSM:
+
+| # | Réteg | Mit ad | Megbízhatóság |
+|---|-------|--------|---------------|
+| 0 | **Hivatalos zónakészlet** (`data/zones.json`) | zónakód, díj, időszak, pontos határ | magas |
+| 1 | OSM zóna-poligon (`zone=parking`) | zónakód, ha az OSM tárolja | közepes |
+| 2 | OSM úttest-tagek (`parking:*`) | fizetős-e a szakasz, néha kód | gyenge–közepes |
+| 3 | Közeli `amenity=parking` | csak kontextus | gyenge |
+
+Ha egyik réteg sem tud semmit, a válasz `unknown` — **nem** „ingyenes”.
+
+### Hogyan mérhető, hogy tényleg működik-e
+
+Két eszköz van rá, és mindkettő valódi lekérdezést futtat, nem becsül:
+
+```bash
+# 1) Parancssorból, tetszőleges környezet ellen
+npm run verify:zones -- --base https://melyik-zona.vercel.app
+
+# 2) Böngészőből, kattintásra
+#    → /diagnosztika oldal, „Mérés indítása”
+```
+
+Mindkettő ugyanazt a 22 ellenőrző pontot méri (`data/probe-points.json`):
+13 budapesti helyszín, 7 vidéki nagyváros, és 2 kontrollpont, ahol *nem*
+szabad fizetős zónát találni. A jelentés megmutatja, hány ponton kaptunk
+zónakódot — ez az egyetlen szám, ami számít.
+
+A `data/probe-points.json` `expectation` mezője **emberi feltételezés**, nem
+hiteles adat: azért van ott, hogy a gyanús eltérések kiugorjanak.
+
+### Hivatalos zónaadat betöltése
+
+Ez a lépés teszi a terméket használhatóvá ott, ahol az OSM nem elég.
+
+```bash
+# a hivatalos állomány WGS84-ben kell legyen; ha EOV-ban van:
+ogr2ogr -f GeoJSON -t_srs EPSG:4326 zonak-wgs84.geojson eredeti.geojson
+
+node scripts/import-zones.mjs zonak-wgs84.geojson \
+  --source "a forrás megnevezése" \
+  --license "a licenc megnevezése"
+```
+
+Az importáló felismeri a szokásos magyar mezőneveket (`zonakod`, `ovezet`,
+`oradij`, `idoszak`…), kézzel is felülírható (`--code`, `--hours`, …), és
+**megtagadja az importot, ha a koordináták nem WGS84-ben vannak** — mert
+átvetítés nélkül minden pont rossz helyre kerülne, ami rosszabb a semminél.
+
+Az eredmény a `data/zones.json`, amit a `lib/zoneDataset.ts` bbox-előszűréssel
+és pont-a-poligonban teszttel keres. Betöltés után a `/api/status` és a
+kezdőlap is jelzi, hogy hivatalos adatból dolgozunk.
+
+---
 
 ## Futtatás fejlesztői gépen
 
@@ -77,6 +144,9 @@ http://localhost:3000/?lat=47.4979&lon=19.0546
 | `debug` | nem | `1` esetén a nyers Overpass statisztikát is visszaadja |
 
 `GET /api/coverage` — országos lefedettség (paraméter nélkül, 24 órára cache-elve).
+
+`GET /api/status` — milyen adatforrásra támaszkodhat a rendszer (be van-e töltve
+hivatalos zónakészlet, hány zóna, mennyi kóddal).
 
 Válasz (rövidítve):
 
@@ -129,9 +199,19 @@ lib/
   streetParking.ts         az úttestre tagelt parkolási adat értelmezése
   openingHours.ts          idősáv-kiértékelés + magyar munkaszüneti napok
   cities.ts                városközpontok a lefedettségi bontáshoz
+  zoneDataset.ts           hivatalos zónakészlet: bbox-index + pont-a-poligonban
+  officialLayer.ts         a hivatalos találat beillesztése a válaszba
+data/
+  zones.json               a hivatalos zónakészlet (alapból üres)
+  probe-points.json        ellenőrző pontok a méréshez
+scripts/
+  import-zones.mjs         hivatalos GeoJSON → data/zones.json
+  verify-zones.mjs         éles mérés: hány ponton van zónakód
 tests/
   lookup.test.cjs          geometria, tag-értelmezés, rétegzett verdikt
   hours.test.cjs           idősáv-kiértékelés, ünnepnapok, időzóna
+  dataset.test.cjs         zónakészlet keresés, lyukas poligon, bbox
+  pipeline.test.cjs        végponttól végpontig: koordináta → kód → időszak
 ```
 
 ## Deploy
